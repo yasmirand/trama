@@ -217,7 +217,6 @@
     color: var(--ink);
     background: var(--warm-white);
     transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
     -webkit-appearance: none;
   }
   input:focus, select:focus, textarea:focus {
@@ -563,6 +562,8 @@
   <button class="tab-btn" onclick="showTab('producao')">Produção</button>
   <button class="tab-btn" onclick="showTab('vendas')">Vendas</button>
   <button class="tab-btn" onclick="showTab('financeiro')">Financeiro</button>
+  <button class="tab-btn" onclick="showTab('pedidos')">Pedidos</button>
+  <button class="tab-btn" onclick="showTab('pessoal')">Pessoal</button>
 </nav>
 
 <!-- ===================== PAINEL ===================== -->
@@ -866,6 +867,122 @@
   <div class="mov-list" id="listaFinanceiro"></div>
 </div>
 
+
+<!-- ===================== PEDIDOS ===================== -->
+<div class="tab-content" id="tab-pedidos">
+  <p class="section-title">Pedidos de Clientes</p>
+
+  <div class="form-card">
+    <h3>➕ Novo Pedido</h3>
+    <div class="form-row">
+      <div>
+        <label>Nome do Cliente</label>
+        <input type="text" id="pedCliente" placeholder="ex: Maria Silva">
+      </div>
+      <div>
+        <label>Data do Pedido</label>
+        <input type="date" id="pedData">
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Produto / Descrição</label>
+        <input type="text" id="pedProduto" placeholder="ex: Pulseira Boho Azul com fecho dourado">
+      </div>
+    </div>
+    <div class="form-row triple">
+      <div>
+        <label>Quantidade</label>
+        <input type="number" id="pedQtd" value="1" min="1">
+      </div>
+      <div>
+        <label>Valor Total (R$)</label>
+        <input type="number" id="pedValor" placeholder="0.00" step="0.01">
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="pedStatus">
+          <option value="pendente">Pendente</option>
+          <option value="producao">Em Produção</option>
+          <option value="finalizado">Finalizado</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="cadastrarPedido()">Cadastrar Pedido</button>
+  </div>
+
+  <div class="divider">Lista de Pedidos</div>
+  <div class="items-list" id="listaPedidos"></div>
+</div>
+
+<!-- ===================== FINANCEIRO PESSOAL ===================== -->
+<div class="tab-content" id="tab-pessoal">
+  <p class="section-title">Financeiro Pessoal</p>
+
+  <div class="dashboard-grid" style="margin-bottom:20px">
+    <div class="dash-card dash-card-full">
+      <div class="label">Saldo Pessoal</div>
+      <div class="value" id="pessSaldo">R$ 0,00</div>
+      <div class="sub">Separado do caixa da empresa</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Entradas</div>
+      <div class="value positive" id="pessEntradas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Saídas</div>
+      <div class="value negative" id="pessSaidas">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>➕ Novo Lançamento Pessoal</h3>
+    <div class="form-row">
+      <div>
+        <label>Tipo</label>
+        <select id="pessTipo">
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+      </div>
+      <div>
+        <label>Valor (R$)</label>
+        <input type="number" id="pessValor" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Categoria</label>
+        <select id="pessCategoria">
+          <option value="salario">Salário / Pró-labore</option>
+          <option value="retirada">Retirada da Empresa</option>
+          <option value="alimentacao">Alimentação</option>
+          <option value="moradia">Moradia</option>
+          <option value="transporte">Transporte</option>
+          <option value="saude">Saúde</option>
+          <option value="lazer">Lazer</option>
+          <option value="educacao">Educação</option>
+          <option value="outros">Outros</option>
+        </select>
+      </div>
+      <div>
+        <label>Data</label>
+        <input type="date" id="pessData">
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Descrição</label>
+        <input type="text" id="pessDesc" placeholder="ex: Conta de luz, supermercado...">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="lancarPessoal()">Lançar</button>
+  </div>
+
+  <div class="divider">Movimentações Pessoais</div>
+  <div class="mov-list" id="listaPessoal"></div>
+</div>
+
 <!-- ===================== MODAL MOVIMENTAÇÃO MATERIAL ===================== -->
 <div class="modal-overlay" id="modalMovMaterial">
   <div class="modal">
@@ -927,7 +1044,9 @@ let state = {
   vendas: [],         // { id, pulseiraId, nome, qtd, valor, data }
   producoes: [],      // { id, pulseiraId, nome, qtd, data }
   financeiro: [],     // { id, tipo, valor, desc, data }
-  historico: []       // { id, tipo, desc, qtd, data }
+  historico: [],      // { id, tipo, desc, qtd, data }
+  pedidos: [],        // { id, cliente, produto, qtd, valor, data, status }
+  pessoal: []         // { id, tipo, valor, categoria, desc, data }
 };
 
 // ===================================================================
@@ -1541,6 +1660,206 @@ function renderFinanceiro() {
   `).join('');
 }
 
+
+// ===================================================================
+// PEDIDOS
+// ===================================================================
+function cadastrarPedido() {
+  const cliente = document.getElementById('pedCliente').value.trim();
+  const produto = document.getElementById('pedProduto').value.trim();
+  const qtd = parseInt(document.getElementById('pedQtd').value) || 1;
+  const valor = parseFloat(document.getElementById('pedValor').value) || 0;
+  const data = document.getElementById('pedData').value;
+  const status = document.getElementById('pedStatus').value;
+
+  if (!cliente) return toast('Informe o nome do cliente', 'error');
+  if (!produto) return toast('Informe o produto/descrição', 'error');
+
+  state.pedidos.push({
+    id: gerarId(), cliente, produto, qtd, valor,
+    data: data || new Date().toISOString().substr(0,10),
+    status
+  });
+  salvarState();
+  renderPedidos();
+  toast('Pedido cadastrado!');
+  ['pedCliente','pedProduto','pedValor'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pedQtd').value = '1';
+  document.getElementById('pedStatus').value = 'pendente';
+}
+
+function alterarStatusPedido(id, novoStatus) {
+  const p = state.pedidos.find(x => x.id === id);
+  if (!p) return;
+  p.status = novoStatus;
+  salvarState();
+  renderPedidos();
+  toast('Status atualizado!');
+}
+
+function finalizarPedido(id) {
+  const p = state.pedidos.find(x => x.id === id);
+  if (!p) return;
+  p.status = 'finalizado';
+
+  // Registrar automaticamente como venda se tiver valor
+  if (p.valor > 0) {
+    state.vendas.push({
+      id: gerarId(),
+      pulseiraId: null,
+      nome: p.produto + ' (pedido de ' + p.cliente + ')',
+      qtd: p.qtd,
+      valor: p.valor,
+      data: new Date().toISOString().substr(0,10)
+    });
+    state.financeiro.push({
+      id: gerarId(),
+      tipo: 'entrada',
+      valor: p.valor,
+      desc: 'Pedido finalizado: ' + p.cliente + ' — ' + p.produto,
+      data: new Date().toISOString().substr(0,10)
+    });
+    toast('Pedido finalizado e registrado como venda!');
+  } else {
+    toast('Pedido finalizado!');
+  }
+
+  salvarState();
+  renderPedidos();
+  renderFinanceiro();
+}
+
+function excluirPedido(id) {
+  if (!confirm('Excluir este pedido?')) return;
+  state.pedidos = state.pedidos.filter(x => x.id !== id);
+  salvarState();
+  renderPedidos();
+  toast('Pedido excluído');
+}
+
+function renderPedidos() {
+  const el = document.getElementById('listaPedidos');
+  if (!el) return;
+
+  // Garantir que pedidos existe no state (compatibilidade)
+  if (!state.pedidos) state.pedidos = [];
+
+  if (state.pedidos.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>Nenhum pedido cadastrado ainda</p></div>';
+    return;
+  }
+
+  const statusLabel = { pendente: 'Pendente', producao: 'Em Produção', finalizado: 'Finalizado' };
+  const statusBadge = { pendente: 'badge-low', producao: 'badge-ok', finalizado: '' };
+  const statusStyle = { finalizado: 'background:#F3E5F5;color:#6A1B9A' };
+
+  // Ordenar: pendentes e em produção primeiro
+  const ordem = { pendente: 0, producao: 1, finalizado: 2 };
+  const sorted = [...state.pedidos].sort((a,b) => ordem[a.status] - ordem[b.status]);
+
+  el.innerHTML = sorted.map(p => {
+    const badgeClass = p.status === 'finalizado' ? '' : statusBadge[p.status];
+    const badgeStyleAttr = p.status === 'finalizado' ? 'style="background:#F3E5F5;color:#6A1B9A;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;"' : '';
+    const badgeEl = p.status === 'finalizado'
+      ? `<span ${badgeStyleAttr}>${statusLabel[p.status]}</span>`
+      : `<span class="item-badge ${badgeClass}">${statusLabel[p.status]}</span>`;
+
+    const acoesBotoes = p.status !== 'finalizado' ? `
+      <button class="btn btn-sm btn-secondary" onclick="alterarStatusPedido('${p.id}', '${p.status === 'pendente' ? 'producao' : 'pendente'}')">
+        ${p.status === 'pendente' ? '🔧 Iniciar Produção' : '⏸ Voltar p/ Pendente'}
+      </button>
+      <button class="btn btn-sm btn-sage" onclick="finalizarPedido('${p.id}')">✓ Finalizar</button>
+    ` : '<span class="text-muted" style="font-size:11px">✓ Concluído</span>';
+
+    return `
+      <div class="item-card" style="${p.status === 'finalizado' ? 'opacity:0.7' : ''}">
+        <div class="item-header">
+          <div class="item-name">${p.cliente}</div>
+          ${badgeEl}
+        </div>
+        <div class="item-details">
+          <div class="item-detail">Produto: <strong>${p.produto}</strong></div>
+          <div class="item-detail">Qtd: <strong>${p.qtd}</strong></div>
+          <div class="item-detail">Valor: <strong>${fmt(p.valor)}</strong></div>
+          <div class="item-detail">Data: <strong>${fmtData(p.data)}</strong></div>
+        </div>
+        <div class="item-actions">
+          ${acoesBotoes}
+          <button class="btn-danger-sm" onclick="excluirPedido('${p.id}')">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===================================================================
+// FINANCEIRO PESSOAL
+// ===================================================================
+function lancarPessoal() {
+  const tipo = document.getElementById('pessTipo').value;
+  const valor = parseFloat(document.getElementById('pessValor').value) || 0;
+  const categoria = document.getElementById('pessCategoria').value;
+  const desc = document.getElementById('pessDesc').value.trim();
+  const data = document.getElementById('pessData').value;
+
+  if (!valor) return toast('Informe o valor', 'error');
+
+  if (!state.pessoal) state.pessoal = [];
+  state.pessoal.push({
+    id: gerarId(), tipo, valor, categoria,
+    desc: desc || categoria,
+    data: data || new Date().toISOString().substr(0,10)
+  });
+  salvarState();
+  renderPessoal();
+  document.getElementById('pessValor').value = '';
+  document.getElementById('pessDesc').value = '';
+  toast('Lançamento pessoal registrado!');
+}
+
+function renderPessoal() {
+  if (!state.pessoal) state.pessoal = [];
+
+  let entradas = 0, saidas = 0;
+  state.pessoal.forEach(m => {
+    if (m.tipo === 'entrada') entradas += m.valor;
+    else saidas += m.valor;
+  });
+  const saldo = entradas - saidas;
+
+  const saldoEl = document.getElementById('pessSaldo');
+  const entEl = document.getElementById('pessEntradas');
+  const saiEl = document.getElementById('pessSaidas');
+  if (saldoEl) saldoEl.textContent = fmt(saldo);
+  if (entEl) entEl.textContent = fmt(entradas);
+  if (saiEl) saiEl.textContent = fmt(saidas);
+
+  const catLabel = {
+    salario:'Salário/Pró-labore', retirada:'Retirada da Empresa',
+    alimentacao:'Alimentação', moradia:'Moradia', transporte:'Transporte',
+    saude:'Saúde', lazer:'Lazer', educacao:'Educação', outros:'Outros'
+  };
+
+  const el = document.getElementById('listaPessoal');
+  if (!el) return;
+  const lista = [...state.pessoal].reverse();
+  if (lista.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">👛</div><p>Nenhum lançamento pessoal ainda</p></div>';
+    return;
+  }
+  el.innerHTML = lista.map(m => `
+    <div class="mov-item">
+      <div class="mov-info">
+        <div class="mov-desc">${m.desc} <span style="font-size:10px;color:var(--muted)">[${catLabel[m.categoria] || m.categoria}]</span></div>
+        <div class="mov-date">${fmtData(m.data)}</div>
+      </div>
+      <div class="mov-value ${m.tipo}">
+        ${m.tipo === 'entrada' ? '+' : '-'}${fmt(m.valor)}
+      </div>
+    </div>
+  `).join('');
+}
+
 // ===================================================================
 // RENDER GERAL
 // ===================================================================
@@ -1552,6 +1871,8 @@ function renderAll() {
   renderVendas();
   renderProducao();
   renderFinanceiro();
+  renderPedidos();
+  renderPessoal();
   verificarAlertas();
 }
 
@@ -1560,12 +1881,17 @@ function renderAll() {
 // ===================================================================
 document.addEventListener('DOMContentLoaded', () => {
   carregarState();
+  // Garantir arrays novos existem em states antigos (migração)
+  if (!state.pedidos) state.pedidos = [];
+  if (!state.pessoal) state.pessoal = [];
   renderAll();
 
   // Definir data de hoje nos campos de data
   const hoje = new Date().toISOString().substr(0, 10);
-  const dataVenda = document.getElementById('vendaData');
-  if (dataVenda) dataVenda.value = hoje;
+  ['vendaData','pedData','pessData'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = hoje;
+  });
 });
 </script>
 </body>

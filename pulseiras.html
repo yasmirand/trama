@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trama — Gestão de Pulseiras</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ===== RESET & VARIÁVEIS ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #FFFFFF;
+    --warm-white: #FFF8F9;
+    --blush: #FF7096;
+    --rose: #E8184E;
+    --rose-dark: #C01040;
+    --clay: #FF8FAA;
+    --sage: #D4234F;
+    --sage-dark: #A81840;
+    --ink: #1A0810;
+    --ink-light: #4A1528;
+    --muted: #A05070;
+    --border: #FFD6E0;
+    --card-bg: #FFFFFF;
+    --shadow: 0 2px 20px rgba(220,30,70,0.07);
+    --shadow-md: 0 8px 40px rgba(220,30,70,0.13);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* ===== HEADER ===== */
+  .app-header {
+    background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
+    color: #FFFFFF;
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .app-header h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+  .app-header h1 em {
+    color: var(--blush);
+    font-style: italic;
+  }
+  .app-header p {
+    font-size: 11px;
+    color: var(--clay);
+    margin-top: 2px;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ===== ALERTAS DE ESTOQUE BAIXO ===== */
+  .alerts-bar {
+    background: #FFF3CD;
+    border-bottom: 1px solid #FFD66B;
+    padding: 8px 20px;
+    font-size: 12px;
+    color: #7A5C00;
+    display: none;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .alerts-bar.visible { display: flex; align-items: center; }
+  .alerts-bar strong { font-weight: 600; }
+
+  /* ===== NAVEGAÇÃO (TABS) ===== */
+  .tab-nav {
+    background: #FFFFFF;
+    border-bottom: 2px solid #FFD6E0;
+    padding: 0 12px;
+    display: flex;
+    overflow-x: auto;
+    gap: 2px;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 14px 14px;
+    border: none;
+    background: none;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .tab-btn.active {
+    color: var(--rose);
+    border-bottom-color: var(--rose);
+  }
+  .tab-btn:hover:not(.active) { color: var(--ink-light); }
+
+  /* ===== CONTEÚDO DAS ABAS ===== */
+  .tab-content { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ===== CARDS DO PAINEL ===== */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .dash-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .dash-card .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .dash-card .value {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .dash-card .value.positive { color: var(--sage-dark); }
+  .dash-card .value.negative { color: var(--rose-dark); }
+  .dash-card .sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .dash-card-full {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
+    color: white;
+    border: none;
+  }
+  .dash-card-full .label { color: #FFB3C4; }
+  .dash-card-full .value { color: white; font-size: 28px; }
+
+  /* ===== SEÇÕES ===== */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* ===== FORMULÁRIOS ===== */
+  .form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .form-card h3 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--ink-light);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--warm-white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(212,130,106,0.15);
+  }
+  select { cursor: pointer; }
+
+  /* ===== BOTÕES ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+  .btn-primary {
+    background: var(--rose);
+    color: white;
+    width: 100%;
+    margin-top: 4px;
+    padding: 13px;
+    font-size: 14px;
+  }
+  .btn-primary:hover { background: var(--rose-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink-light);
+    width: 100%;
+    margin-top: 4px;
+  }
+  .btn-secondary:hover { border-color: var(--rose); color: var(--rose); }
+  .btn-sage {
+    background: var(--sage);
+    color: white;
+    width: 100%;
+    margin-top: 4px;
+    padding: 13px;
+    font-size: 14px;
+  }
+  .btn-sage:hover { background: var(--sage-dark); transform: translateY(-1px); }
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 11px;
+    width: auto;
+    border-radius: 6px;
+  }
+  .btn-danger-sm {
+    background: transparent;
+    border: 1px solid #FFCDD2;
+    color: #C62828;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-danger-sm:hover { background: #FFCDD2; }
+
+  /* ===== LISTA DE ITENS ===== */
+  .items-list { display: flex; flex-direction: column; gap: 10px; }
+  .item-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s;
+  }
+  .item-card:hover { box-shadow: var(--shadow-md); }
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .item-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .item-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .badge-ok { background: #E8F5E9; color: #2E7D32; }
+  .badge-low { background: #FFF3CD; color: #7A5C00; }
+  .badge-zero { background: #FFEBEE; color: #C62828; }
+  .item-details {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .item-detail {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .item-detail strong {
+    color: var(--ink-light);
+    font-weight: 600;
+  }
+  .item-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ===== CALCULADORA ===== */
+  .calc-result {
+    background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
+    border-radius: var(--radius);
+    padding: 20px;
+    color: white;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .calc-result .result-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #FFB3C4;
+    margin-bottom: 4px;
+  }
+  .calc-result .result-value {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    color: white;
+    line-height: 1;
+  }
+  .calc-result .result-sub {
+    font-size: 12px;
+    color: #FFB3C4;
+    margin-top: 6px;
+  }
+  .calc-breakdown {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    text-align: left;
+  }
+  .calc-breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: white;
+    padding: 3px 0;
+    opacity: 0.85;
+  }
+  .calc-breakdown-row.total {
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-top: 4px;
+    padding-top: 6px;
+    font-weight: 600;
+    opacity: 1;
+    color: #FFB3C4;
+  }
+  .margin-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .margin-row label {
+    margin: 0;
+    white-space: nowrap;
+    font-size: 11px;
+  }
+  .margin-row input {
+    flex: 1;
+    max-width: 80px;
+  }
+  .margin-preview {
+    font-size: 12px;
+    color: var(--sage-dark);
+    font-weight: 600;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,33,24,0.5);
+    z-index: 200;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
+  .modal {
+    background: var(--warm-white);
+    border-radius: var(--radius);
+    padding: 22px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: var(--shadow-md);
+  }
+  .modal h3 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .modal-actions .btn { margin: 0; }
+
+  /* ===== HISTÓRICO / MOVIMENTAÇÕES ===== */
+  .mov-list { display: flex; flex-direction: column; gap: 6px; }
+  .mov-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .mov-info .mov-desc { font-weight: 500; color: var(--ink); }
+  .mov-info .mov-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .mov-value { font-weight: 700; font-size: 15px; }
+  .mov-value.entrada { color: var(--sage-dark); }
+  .mov-value.saida { color: var(--rose-dark); }
+  .mov-value.retirada { color: var(--clay); }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-state p { font-size: 13px; }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.success { background: var(--sage-dark); }
+  #toast.error { background: var(--rose-dark); }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    text-align: center;
+    position: relative;
+    margin: 16px 0;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 380px) {
+    .form-row { grid-template-columns: 1fr; }
+    .form-row.triple { grid-template-columns: 1fr 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .dash-card-full { grid-column: auto; }
+  }
+
+  /* ===== MISC ===== */
+  .text-muted { color: var(--muted); font-size: 12px; }
+  .mt-8 { margin-top: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+  .highlight-box {
+    background: #E8F5E9;
+    border: 1px solid #A5D6A7;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 12px;
+    color: #2E7D32;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <h1>Trama <em>Pulseiras</em></h1>
+  <p>Sistema de Gestão Artesanal</p>
+</header>
+
+<!-- ALERTAS -->
+<div class="alerts-bar" id="alertsBar">
+  <strong>⚠ Estoque baixo:</strong>
+  <span id="alertsList"></span>
+</div>
+
+<!-- NAVEGAÇÃO -->
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('painel')">Painel</button>
+  <button class="tab-btn" onclick="showTab('materiais')">Materiais</button>
+  <button class="tab-btn" onclick="showTab('pulseiras')">Pulseiras</button>
+  <button class="tab-btn" onclick="showTab('calculadora')">Calculadora</button>
+  <button class="tab-btn" onclick="showTab('producao')">Produção</button>
+  <button class="tab-btn" onclick="showTab('vendas')">Vendas</button>
+  <button class="tab-btn" onclick="showTab('financeiro')">Financeiro</button>
+</nav>
+
+<!-- ===================== PAINEL ===================== -->
+<div class="tab-content active" id="tab-painel">
+  <p class="section-title">Resumo do Negócio</p>
+  <div class="dashboard-grid" id="dashboardGrid">
+    <div class="dash-card dash-card-full">
+      <div class="label">Saldo da Empresa</div>
+      <div class="value" id="dSaldo">R$ 0,00</div>
+      <div class="sub">Caixa atual</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Entradas (mês)</div>
+      <div class="value positive" id="dEntradas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Saídas (mês)</div>
+      <div class="value negative" id="dSaidas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Modelos Cadastrados</div>
+      <div class="value" id="dModelos">0</div>
+      <div class="sub">pulseiras</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Itens no Estoque</div>
+      <div class="value" id="dMateriais">0</div>
+      <div class="sub">materiais</div>
+    </div>
+  </div>
+
+  <p class="section-title">Últimas Vendas</p>
+  <div id="dashVendas" class="items-list"></div>
+
+  <p class="section-title" style="margin-top:20px">Estoque de Pulseiras</p>
+  <div id="dashEstoquePulseiras" class="items-list"></div>
+</div>
+
+<!-- ===================== MATERIAIS ===================== -->
+<div class="tab-content" id="tab-materiais">
+  <p class="section-title">Estoque de Materiais</p>
+
+  <div class="form-card">
+    <h3>➕ Cadastrar Material</h3>
+    <div class="form-row">
+      <div>
+        <label>Nome do Material</label>
+        <input type="text" id="matNome" placeholder="ex: Miçanga rosa">
+      </div>
+      <div>
+        <label>Unidade</label>
+        <select id="matUnidade">
+          <option value="unid">unid</option>
+          <option value="g">g</option>
+          <option value="kg">kg</option>
+          <option value="cm">cm</option>
+          <option value="m">m</option>
+          <option value="rolo">rolo</option>
+          <option value="pct">pct</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Quantidade Inicial</label>
+        <input type="number" id="matQtd" placeholder="0" min="0" step="any">
+      </div>
+      <div>
+        <label>Custo por Unidade (R$)</label>
+        <input type="number" id="matCusto" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="cadastrarMaterial()">Cadastrar Material</button>
+  </div>
+
+  <div class="divider">Lista de Materiais</div>
+  <div class="items-list" id="listaMateriais"></div>
+</div>
+
+<!-- ===================== PULSEIRAS ===================== -->
+<div class="tab-content" id="tab-pulseiras">
+  <p class="section-title">Estoque de Pulseiras</p>
+
+  <div class="form-card">
+    <h3>➕ Cadastrar Modelo</h3>
+    <div class="form-row single">
+      <div>
+        <label>Nome do Modelo</label>
+        <input type="text" id="pulNome" placeholder="ex: Pulseira Boho Azul">
+      </div>
+    </div>
+    <div class="form-row triple">
+      <div>
+        <label>Custo (R$)</label>
+        <input type="number" id="pulCusto" placeholder="0.00" step="0.01">
+      </div>
+      <div>
+        <label>Preço Venda (R$)</label>
+        <input type="number" id="pulPreco" placeholder="0.00" step="0.01">
+      </div>
+      <div>
+        <label>Qtd Inicial</label>
+        <input type="number" id="pulQtd" placeholder="0" min="0">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="cadastrarPulseira()">Cadastrar Modelo</button>
+  </div>
+
+  <div class="divider">Modelos Cadastrados</div>
+  <div class="items-list" id="listaPulseiras"></div>
+</div>
+
+<!-- ===================== CALCULADORA ===================== -->
+<div class="tab-content" id="tab-calculadora">
+  <p class="section-title">Calculadora de Custo</p>
+
+  <div class="calc-result" id="calcResult">
+    <div class="result-label">Preço Final Sugerido</div>
+    <div class="result-value" id="calcPrecoFinal">R$ 0,00</div>
+    <div class="result-sub" id="calcSub">Preencha os campos abaixo</div>
+    <div class="calc-breakdown" id="calcBreakdown" style="display:none">
+      <div class="calc-breakdown-row"><span>Miçangas</span><span id="bMicanga">R$ 0,00</span></div>
+      <div class="calc-breakdown-row"><span>Fio</span><span id="bFio">R$ 0,00</span></div>
+      <div class="calc-breakdown-row"><span>Pingente/Fecho</span><span id="bPingente">R$ 0,00</span></div>
+      <div class="calc-breakdown-row"><span>Mão de obra</span><span id="bMaoObra">R$ 0,00</span></div>
+      <div class="calc-breakdown-row total"><span>Custo Total</span><span id="bTotal">R$ 0,00</span></div>
+      <div class="calc-breakdown-row total" style="margin-top:2px;border:none"><span>+ Margem</span><span id="bMargem">R$ 0,00</span></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>Composição da Pulseira</h3>
+    <div class="form-row">
+      <div>
+        <label>Qtd de Miçangas</label>
+        <input type="number" id="cMicangaQtd" placeholder="ex: 50" oninput="calcular()">
+      </div>
+      <div>
+        <label>Custo unitário (R$)</label>
+        <input type="number" id="cMicangaCusto" placeholder="ex: 0.05" step="0.001" oninput="calcular()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Tamanho do Fio (cm)</label>
+        <input type="number" id="cFioTam" placeholder="ex: 25" oninput="calcular()">
+      </div>
+      <div>
+        <label>Custo por cm (R$)</label>
+        <input type="number" id="cFioCusto" placeholder="ex: 0.08" step="0.001" oninput="calcular()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Pingente + Fecho (R$)</label>
+        <input type="number" id="cPingente" placeholder="ex: 1.50" step="0.01" oninput="calcular()">
+      </div>
+      <div>
+        <label>Mão de obra (R$)</label>
+        <input type="number" id="cMaoObra" placeholder="ex: 5.00" step="0.01" oninput="calcular()">
+      </div>
+    </div>
+    <hr>
+    <div class="margin-row">
+      <label>Margem de Lucro:</label>
+      <input type="number" id="cMargem" value="50" min="0" max="1000" step="1" oninput="calcular()" style="max-width:70px">
+      <span>%</span>
+      <span class="margin-preview" id="marginPreview"></span>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>💾 Salvar como Pulseira</h3>
+    <div class="form-row single">
+      <div>
+        <label>Nome do Modelo</label>
+        <input type="text" id="cNome" placeholder="Nome da pulseira">
+      </div>
+    </div>
+    <button class="btn btn-sage" onclick="salvarDaCalculadora()">Salvar Pulseira no Sistema</button>
+  </div>
+</div>
+
+<!-- ===================== PRODUÇÃO ===================== -->
+<div class="tab-content" id="tab-producao">
+  <p class="section-title">Registrar Produção</p>
+
+  <div class="form-card">
+    <h3>🛠 Produzir Pulseiras</h3>
+    <p class="text-muted mb-12">Desconta automaticamente os materiais usados e adiciona ao estoque de pulseiras.</p>
+    <div class="form-row single">
+      <div>
+        <label>Modelo de Pulseira</label>
+        <select id="prodPulseira" onchange="carregarReceitaProducao()">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Quantidade a Produzir</label>
+        <input type="number" id="prodQtd" value="1" min="1">
+      </div>
+    </div>
+    <div id="receitaProducao"></div>
+    <button class="btn btn-sage" onclick="registrarProducao()">✓ Registrar Produção</button>
+  </div>
+
+  <div class="divider">Histórico de Produção</div>
+  <div class="mov-list" id="listaProducao"></div>
+</div>
+
+<!-- ===================== VENDAS ===================== -->
+<div class="tab-content" id="tab-vendas">
+  <p class="section-title">Registrar Venda</p>
+
+  <div class="form-card">
+    <h3>💰 Nova Venda</h3>
+    <div class="form-row">
+      <div>
+        <label>Produto</label>
+        <select id="vendaPulseira" onchange="preencherPrecoVenda()">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+      <div>
+        <label>Quantidade</label>
+        <input type="number" id="vendaQtd" value="1" min="1" oninput="preencherPrecoVenda()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Valor Total (R$)</label>
+        <input type="number" id="vendaValor" placeholder="0.00" step="0.01">
+      </div>
+      <div>
+        <label>Data</label>
+        <input type="date" id="vendaData">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="registrarVenda()">Registrar Venda</button>
+  </div>
+
+  <div class="divider">Histórico de Vendas</div>
+  <div class="mov-list" id="listaVendas"></div>
+</div>
+
+<!-- ===================== FINANCEIRO ===================== -->
+<div class="tab-content" id="tab-financeiro">
+  <p class="section-title">Controle Financeiro</p>
+
+  <div class="dashboard-grid" style="margin-bottom:20px">
+    <div class="dash-card dash-card-full">
+      <div class="label">Saldo Atual do Caixa</div>
+      <div class="value" id="finSaldo">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Total Entradas</div>
+      <div class="value positive" id="finEntradas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Total Saídas</div>
+      <div class="value negative" id="finSaidas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Retiradas</div>
+      <div class="value" style="color:var(--clay)" id="finRetiradas">R$ 0,00</div>
+    </div>
+    <div class="dash-card">
+      <div class="label">Lucro Estimado</div>
+      <div class="value positive" id="finLucro">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>➕ Lançamento Manual</h3>
+    <div class="form-row">
+      <div>
+        <label>Tipo</label>
+        <select id="finTipo">
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída (compra material)</option>
+          <option value="retirada">Retirada Pessoal</option>
+        </select>
+      </div>
+      <div>
+        <label>Valor (R$)</label>
+        <input type="number" id="finValor" placeholder="0.00" step="0.01">
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Descrição</label>
+        <input type="text" id="finDesc" placeholder="ex: Compra de miçangas no atacado">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="lancarMovimento()">Lançar</button>
+  </div>
+
+  <div class="divider">Movimentações</div>
+  <div class="mov-list" id="listaFinanceiro"></div>
+</div>
+
+<!-- ===================== MODAL MOVIMENTAÇÃO MATERIAL ===================== -->
+<div class="modal-overlay" id="modalMovMaterial">
+  <div class="modal">
+    <h3 id="modalMovTitulo">Movimentar Estoque</h3>
+    <input type="hidden" id="modalMovId">
+    <div class="form-row single">
+      <div>
+        <label>Tipo</label>
+        <select id="modalMovTipo">
+          <option value="entrada">Entrada (compra)</option>
+          <option value="saida">Saída (uso)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Quantidade</label>
+        <input type="number" id="modalMovQtd" placeholder="0" min="0.01" step="any">
+      </div>
+    </div>
+    <div class="form-row single">
+      <div>
+        <label>Observação (opcional)</label>
+        <input type="text" id="modalMovObs" placeholder="ex: Compra fornecedor X">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="salvarMovMaterial()">Confirmar</button>
+      <button class="btn btn-secondary" onclick="fecharModal('modalMovMaterial')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL INGREDIENTES PULSEIRA ===================== -->
+<div class="modal-overlay" id="modalReceita">
+  <div class="modal">
+    <h3 id="modalReceitaTitulo">Receita da Pulseira</h3>
+    <input type="hidden" id="modalReceitaId">
+    <p class="text-muted mb-12">Defina quais materiais são usados neste modelo (para desconto automático na produção).</p>
+    <div id="receitaItens"></div>
+    <button class="btn btn-secondary mt-8" onclick="adicionarItemReceita()">+ Adicionar Material</button>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn btn-sage" onclick="salvarReceita()">Salvar Receita</button>
+      <button class="btn btn-secondary" onclick="fecharModal('modalReceita')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ===================================================================
+// ESTADO GLOBAL — todos os dados ficam aqui e são salvos no localStorage
+// ===================================================================
+let state = {
+  materiais: [],      // { id, nome, qtd, unidade, custo }
+  pulseiras: [],      // { id, nome, custo, preco, qtd, receita: [{matId, qtd}] }
+  vendas: [],         // { id, pulseiraId, nome, qtd, valor, data }
+  producoes: [],      // { id, pulseiraId, nome, qtd, data }
+  financeiro: [],     // { id, tipo, valor, desc, data }
+  historico: []       // { id, tipo, desc, qtd, data }
+};
+
+// ===================================================================
+// PERSISTÊNCIA
+// ===================================================================
+function salvarState() {
+  localStorage.setItem('atelie_state', JSON.stringify(state));
+}
+
+function carregarState() {
+  const raw = localStorage.getItem('atelie_state');
+  if (raw) {
+    try { state = JSON.parse(raw); } catch(e) { console.error(e); }
+  }
+}
+
+function gerarId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+// ===================================================================
+// NAVEGAÇÃO ENTRE ABAS
+// ===================================================================
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  renderAll();
+}
+
+// ===================================================================
+// UTILITÁRIOS
+// ===================================================================
+function fmt(val) {
+  return 'R$ ' + Number(val || 0).toFixed(2).replace('.', ',');
+}
+
+function fmtData(dt) {
+  if (!dt) return '-';
+  const d = new Date(dt + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
+function toast(msg, tipo = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + tipo;
+  setTimeout(() => el.className = '', 2800);
+}
+
+function abrirModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ===================================================================
+// ALERTAS DE ESTOQUE BAIXO
+// ===================================================================
+function verificarAlertas() {
+  const baixos = state.materiais.filter(m => m.qtd <= 5 && m.qtd > 0);
+  const zerados = state.materiais.filter(m => m.qtd <= 0);
+  const todos = [...zerados.map(m => m.nome + ' (ZERADO)'), ...baixos.map(m => m.nome + ' (' + m.qtd + ' ' + m.unidade + ')')];
+  const bar = document.getElementById('alertsBar');
+  if (todos.length > 0) {
+    bar.classList.add('visible');
+    document.getElementById('alertsList').textContent = todos.join(' • ');
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
+// ===================================================================
+// PAINEL
+// ===================================================================
+function renderPainel() {
+  // Saldo
+  let entradas = 0, saidas = 0, retiradas = 0;
+  state.financeiro.forEach(m => {
+    if (m.tipo === 'entrada') entradas += m.valor;
+    else if (m.tipo === 'saida') saidas += m.valor;
+    else if (m.tipo === 'retirada') retiradas += m.valor;
+  });
+  const saldo = entradas - saidas - retiradas;
+
+  // Mês atual
+  const agora = new Date();
+  const mesAtual = agora.getFullYear() + '-' + String(agora.getMonth()+1).padStart(2,'0');
+  let entMes = 0, saiMes = 0;
+  state.financeiro.forEach(m => {
+    const mes = m.data ? m.data.substr(0,7) : '';
+    if (mes === mesAtual) {
+      if (m.tipo === 'entrada') entMes += m.valor;
+      else if (m.tipo === 'saida') saiMes += m.valor;
+    }
+  });
+
+  document.getElementById('dSaldo').textContent = fmt(saldo);
+  document.getElementById('dEntradas').textContent = fmt(entMes);
+  document.getElementById('dSaidas').textContent = fmt(saiMes);
+  document.getElementById('dModelos').textContent = state.pulseiras.length;
+  document.getElementById('dMateriais').textContent = state.materiais.length;
+
+  // Últimas vendas
+  const vendas = [...state.vendas].reverse().slice(0, 4);
+  const dvEl = document.getElementById('dashVendas');
+  if (vendas.length === 0) {
+    dvEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🛍</div><p>Nenhuma venda registrada</p></div>';
+  } else {
+    dvEl.innerHTML = vendas.map(v => `
+      <div class="mov-item">
+        <div class="mov-info">
+          <div class="mov-desc">${v.nome} × ${v.qtd}</div>
+          <div class="mov-date">${fmtData(v.data)}</div>
+        </div>
+        <div class="mov-value entrada">${fmt(v.valor)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Estoque pulseiras
+  const ep = document.getElementById('dashEstoquePulseiras');
+  if (state.pulseiras.length === 0) {
+    ep.innerHTML = '<div class="empty-state"><div class="empty-icon">💎</div><p>Nenhuma pulseira cadastrada</p></div>';
+  } else {
+    ep.innerHTML = state.pulseiras.map(p => {
+      const badge = p.qtd <= 0 ? 'badge-zero' : p.qtd <= 3 ? 'badge-low' : 'badge-ok';
+      const badgeText = p.qtd <= 0 ? 'Zerado' : p.qtd <= 3 ? 'Baixo' : 'OK';
+      const lucro = p.preco - p.custo;
+      const pct = p.custo > 0 ? ((lucro / p.custo) * 100).toFixed(0) : 0;
+      return `
+        <div class="item-card">
+          <div class="item-header">
+            <div class="item-name">${p.nome}</div>
+            <span class="item-badge ${badge}">${badgeText} · ${p.qtd} un</span>
+          </div>
+          <div class="item-details">
+            <div class="item-detail">Preço: <strong>${fmt(p.preco)}</strong></div>
+            <div class="item-detail">Lucro: <strong>${fmt(lucro)} (${pct}%)</strong></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// ===================================================================
+// MATERIAIS
+// ===================================================================
+function cadastrarMaterial() {
+  const nome = document.getElementById('matNome').value.trim();
+  const unidade = document.getElementById('matUnidade').value;
+  const qtd = parseFloat(document.getElementById('matQtd').value) || 0;
+  const custo = parseFloat(document.getElementById('matCusto').value) || 0;
+  if (!nome) return toast('Digite o nome do material', 'error');
+
+  state.materiais.push({ id: gerarId(), nome, unidade, qtd, custo });
+  salvarState();
+  renderMateriais();
+  toast('Material cadastrado!');
+  ['matNome','matQtd','matCusto'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderMateriais() {
+  const el = document.getElementById('listaMateriais');
+  if (state.materiais.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Nenhum material cadastrado ainda</p></div>';
+    return;
+  }
+  el.innerHTML = state.materiais.map(m => {
+    const badge = m.qtd <= 0 ? 'badge-zero' : m.qtd <= 5 ? 'badge-low' : 'badge-ok';
+    const badgeText = m.qtd <= 0 ? 'Zerado!' : m.qtd <= 5 ? 'Baixo' : 'OK';
+    return `
+      <div class="item-card">
+        <div class="item-header">
+          <div class="item-name">${m.nome}</div>
+          <span class="item-badge ${badge}">${badgeText}</span>
+        </div>
+        <div class="item-details">
+          <div class="item-detail">Qtd: <strong>${m.qtd} ${m.unidade}</strong></div>
+          <div class="item-detail">Custo: <strong>${fmt(m.custo)}/${m.unidade}</strong></div>
+          <div class="item-detail">Total: <strong>${fmt(m.qtd * m.custo)}</strong></div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-sm btn-sage" onclick="abrirModalMov('${m.id}')">📥 Movimentar</button>
+          <button class="btn-danger-sm" onclick="excluirMaterial('${m.id}')">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function abrirModalMov(id) {
+  const m = state.materiais.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('modalMovId').value = id;
+  document.getElementById('modalMovTitulo').textContent = 'Movimentar: ' + m.nome;
+  document.getElementById('modalMovQtd').value = '';
+  document.getElementById('modalMovObs').value = '';
+  document.getElementById('modalMovTipo').value = 'entrada';
+  abrirModal('modalMovMaterial');
+}
+
+function salvarMovMaterial() {
+  const id = document.getElementById('modalMovId').value;
+  const tipo = document.getElementById('modalMovTipo').value;
+  const qtd = parseFloat(document.getElementById('modalMovQtd').value);
+  const obs = document.getElementById('modalMovObs').value;
+  if (!qtd || qtd <= 0) return toast('Informe a quantidade', 'error');
+
+  const m = state.materiais.find(x => x.id === id);
+  if (!m) return;
+
+  if (tipo === 'entrada') {
+    m.qtd += qtd;
+    // Lançar no financeiro
+    state.financeiro.push({
+      id: gerarId(), tipo: 'saida',
+      valor: qtd * m.custo,
+      desc: obs || ('Compra: ' + m.nome + ' (' + qtd + ' ' + m.unidade + ')'),
+      data: new Date().toISOString().substr(0, 10)
+    });
+  } else {
+    if (m.qtd < qtd) return toast('Estoque insuficiente (' + m.qtd + ' ' + m.unidade + ')', 'error');
+    m.qtd -= qtd;
+  }
+
+  state.historico.push({ id: gerarId(), tipo, desc: m.nome, qtd, data: new Date().toISOString() });
+  salvarState();
+  fecharModal('modalMovMaterial');
+  renderMateriais();
+  toast(tipo === 'entrada' ? 'Entrada registrada!' : 'Saída registrada!');
+}
+
+function excluirMaterial(id) {
+  if (!confirm('Excluir este material?')) return;
+  state.materiais = state.materiais.filter(m => m.id !== id);
+  salvarState();
+  renderMateriais();
+  toast('Material excluído');
+}
+
+// ===================================================================
+// PULSEIRAS
+// ===================================================================
+function cadastrarPulseira() {
+  const nome = document.getElementById('pulNome').value.trim();
+  const custo = parseFloat(document.getElementById('pulCusto').value) || 0;
+  const preco = parseFloat(document.getElementById('pulPreco').value) || 0;
+  const qtd = parseInt(document.getElementById('pulQtd').value) || 0;
+  if (!nome) return toast('Digite o nome do modelo', 'error');
+
+  state.pulseiras.push({ id: gerarId(), nome, custo, preco, qtd, receita: [] });
+  salvarState();
+  renderPulseiras();
+  toast('Modelo cadastrado!');
+  ['pulNome','pulCusto','pulPreco','pulQtd'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderPulseiras() {
+  const el = document.getElementById('listaPulseiras');
+  if (state.pulseiras.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">💎</div><p>Nenhuma pulseira cadastrada ainda</p></div>';
+    return;
+  }
+  el.innerHTML = state.pulseiras.map(p => {
+    const lucro = p.preco - p.custo;
+    const pct = p.custo > 0 ? ((lucro / p.custo) * 100).toFixed(0) : 0;
+    const badge = p.qtd <= 0 ? 'badge-zero' : p.qtd <= 3 ? 'badge-low' : 'badge-ok';
+    const temReceita = p.receita && p.receita.length > 0;
+    return `
+      <div class="item-card">
+        <div class="item-header">
+          <div class="item-name">${p.nome}</div>
+          <span class="item-badge ${badge}">${p.qtd} un</span>
+        </div>
+        <div class="item-details">
+          <div class="item-detail">Custo: <strong>${fmt(p.custo)}</strong></div>
+          <div class="item-detail">Venda: <strong>${fmt(p.preco)}</strong></div>
+          <div class="item-detail">Lucro: <strong>${fmt(lucro)} (${pct}%)</strong></div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-sm btn-secondary" onclick="abrirReceita('${p.id}')">
+            ${temReceita ? '✏ Receita (' + p.receita.length + ')' : '+ Receita'}
+          </button>
+          <button class="btn-danger-sm" onclick="excluirPulseira('${p.id}')">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function excluirPulseira(id) {
+  if (!confirm('Excluir este modelo?')) return;
+  state.pulseiras = state.pulseiras.filter(p => p.id !== id);
+  salvarState();
+  renderPulseiras();
+  toast('Modelo excluído');
+}
+
+// ===================================================================
+// RECEITA (ingredientes da pulseira)
+// ===================================================================
+let receitaTemp = [];
+
+function abrirReceita(id) {
+  const p = state.pulseiras.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalReceitaId').value = id;
+  document.getElementById('modalReceitaTitulo').textContent = 'Receita: ' + p.nome;
+  receitaTemp = JSON.parse(JSON.stringify(p.receita || []));
+  renderReceitaItens();
+  abrirModal('modalReceita');
+}
+
+function renderReceitaItens() {
+  const el = document.getElementById('receitaItens');
+  if (state.materiais.length === 0) {
+    el.innerHTML = '<p class="text-muted">Cadastre materiais primeiro.</p>';
+    return;
+  }
+  const opts = state.materiais.map(m => `<option value="${m.id}">${m.nome} (${m.unidade})</option>`).join('');
+  el.innerHTML = receitaTemp.map((r, i) => `
+    <div class="form-row" style="align-items:end; margin-bottom:8px">
+      <div>
+        <label>Material</label>
+        <select onchange="receitaTemp[${i}].matId=this.value">
+          ${state.materiais.map(m => `<option value="${m.id}" ${m.id===r.matId?'selected':''}>${m.nome}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label>Quantidade</label>
+        <input type="number" value="${r.qtd}" step="any" min="0"
+          onchange="receitaTemp[${i}].qtd=parseFloat(this.value)||0" style="max-width:80px">
+      </div>
+      <div>
+        <button class="btn-danger-sm" onclick="receitaTemp.splice(${i},1);renderReceitaItens()">✕</button>
+      </div>
+    </div>
+  `).join('') || '<p class="text-muted mb-12">Nenhum item na receita.</p>';
+}
+
+function adicionarItemReceita() {
+  if (state.materiais.length === 0) return toast('Cadastre materiais primeiro', 'error');
+  receitaTemp.push({ matId: state.materiais[0].id, qtd: 1 });
+  renderReceitaItens();
+}
+
+function salvarReceita() {
+  const id = document.getElementById('modalReceitaId').value;
+  const p = state.pulseiras.find(x => x.id === id);
+  if (!p) return;
+  p.receita = receitaTemp.filter(r => r.qtd > 0);
+  salvarState();
+  renderPulseiras();
+  fecharModal('modalReceita');
+  toast('Receita salva!');
+}
+
+// ===================================================================
+// CALCULADORA
+// ===================================================================
+function calcular() {
+  const micQtd = parseFloat(document.getElementById('cMicangaQtd').value) || 0;
+  const micCusto = parseFloat(document.getElementById('cMicangaCusto').value) || 0;
+  const fioTam = parseFloat(document.getElementById('cFioTam').value) || 0;
+  const fioCusto = parseFloat(document.getElementById('cFioCusto').value) || 0;
+  const pingente = parseFloat(document.getElementById('cPingente').value) || 0;
+  const maoObra = parseFloat(document.getElementById('cMaoObra').value) || 0;
+  const margem = parseFloat(document.getElementById('cMargem').value) || 0;
+
+  const vMicanga = micQtd * micCusto;
+  const vFio = fioTam * fioCusto;
+  const total = vMicanga + vFio + pingente + maoObra;
+  const vMargem = total * margem / 100;
+  const precoFinal = total + vMargem;
+
+  document.getElementById('calcPrecoFinal').textContent = fmt(precoFinal);
+  document.getElementById('calcSub').textContent = `Custo: ${fmt(total)} + Margem ${margem}%`;
+  document.getElementById('calcBreakdown').style.display = total > 0 ? 'block' : 'none';
+  document.getElementById('bMicanga').textContent = fmt(vMicanga);
+  document.getElementById('bFio').textContent = fmt(vFio);
+  document.getElementById('bPingente').textContent = fmt(pingente);
+  document.getElementById('bMaoObra').textContent = fmt(maoObra);
+  document.getElementById('bTotal').textContent = fmt(total);
+  document.getElementById('bMargem').textContent = '+' + fmt(vMargem);
+  document.getElementById('marginPreview').textContent = total > 0 ? `→ ${fmt(precoFinal)}` : '';
+}
+
+function salvarDaCalculadora() {
+  const nome = document.getElementById('cNome').value.trim();
+  if (!nome) return toast('Informe o nome da pulseira', 'error');
+
+  const micQtd = parseFloat(document.getElementById('cMicangaQtd').value) || 0;
+  const micCusto = parseFloat(document.getElementById('cMicangaCusto').value) || 0;
+  const fioTam = parseFloat(document.getElementById('cFioTam').value) || 0;
+  const fioCusto = parseFloat(document.getElementById('cFioCusto').value) || 0;
+  const pingente = parseFloat(document.getElementById('cPingente').value) || 0;
+  const maoObra = parseFloat(document.getElementById('cMaoObra').value) || 0;
+  const margem = parseFloat(document.getElementById('cMargem').value) || 0;
+
+  const custo = (micQtd * micCusto) + (fioTam * fioCusto) + pingente + maoObra;
+  const preco = custo * (1 + margem / 100);
+
+  state.pulseiras.push({ id: gerarId(), nome, custo, preco, qtd: 0, receita: [] });
+  salvarState();
+  toast('Pulseira "' + nome + '" salva no sistema!');
+  document.getElementById('cNome').value = '';
+}
+
+// ===================================================================
+// PRODUÇÃO
+// ===================================================================
+function renderSelectPulseiras() {
+  ['prodPulseira', 'vendaPulseira'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Selecione...</option>' +
+      state.pulseiras.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+  });
+}
+
+function carregarReceitaProducao() {
+  const id = document.getElementById('prodPulseira').value;
+  const el = document.getElementById('receitaProducao');
+  if (!id) { el.innerHTML = ''; return; }
+  const p = state.pulseiras.find(x => x.id === id);
+  if (!p || !p.receita || p.receita.length === 0) {
+    el.innerHTML = '<div class="highlight-box">Esta pulseira não tem receita definida. A produção será registrada sem descontar materiais.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="highlight-box"><strong>Materiais que serão descontados:</strong><br>' +
+    p.receita.map(r => {
+      const m = state.materiais.find(x => x.id === r.matId);
+      return m ? `• ${m.nome}: ${r.qtd} ${m.unidade}` : '• Material não encontrado';
+    }).join('<br>') + '</div>';
+}
+
+function registrarProducao() {
+  const pulId = document.getElementById('prodPulseira').value;
+  const qtd = parseInt(document.getElementById('prodQtd').value) || 1;
+  if (!pulId) return toast('Selecione uma pulseira', 'error');
+
+  const p = state.pulseiras.find(x => x.id === pulId);
+  if (!p) return;
+
+  // Verificar estoque de materiais
+  if (p.receita && p.receita.length > 0) {
+    for (const r of p.receita) {
+      const m = state.materiais.find(x => x.id === r.matId);
+      if (!m) continue;
+      const necessario = r.qtd * qtd;
+      if (m.qtd < necessario) {
+        return toast(`Estoque insuficiente de ${m.nome}: precisa de ${necessario} ${m.unidade}, tem ${m.qtd}`, 'error');
+      }
+    }
+    // Descontar
+    for (const r of p.receita) {
+      const m = state.materiais.find(x => x.id === r.matId);
+      if (m) m.qtd -= r.qtd * qtd;
+    }
+  }
+
+  // Adicionar ao estoque de pulseiras
+  p.qtd += qtd;
+
+  state.producoes.push({ id: gerarId(), pulseiraId: pulId, nome: p.nome, qtd, data: new Date().toISOString().substr(0,10) });
+  salvarState();
+  renderMateriais();
+  renderProducao();
+  carregarReceitaProducao();
+  toast('Produção registrada! +' + qtd + ' ' + p.nome);
+}
+
+function renderProducao() {
+  const el = document.getElementById('listaProducao');
+  const lista = [...state.producoes].reverse();
+  if (lista.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🛠</div><p>Nenhuma produção registrada</p></div>';
+    return;
+  }
+  el.innerHTML = lista.map(p => `
+    <div class="mov-item">
+      <div class="mov-info">
+        <div class="mov-desc">+${p.qtd} × ${p.nome}</div>
+        <div class="mov-date">${fmtData(p.data)}</div>
+      </div>
+      <div class="mov-value" style="color:var(--sage-dark)">Produzido</div>
+    </div>
+  `).join('');
+}
+
+// ===================================================================
+// VENDAS
+// ===================================================================
+function preencherPrecoVenda() {
+  const id = document.getElementById('vendaPulseira').value;
+  const qtd = parseInt(document.getElementById('vendaQtd').value) || 1;
+  if (!id) return;
+  const p = state.pulseiras.find(x => x.id === id);
+  if (p) document.getElementById('vendaValor').value = (p.preco * qtd).toFixed(2);
+}
+
+function registrarVenda() {
+  const pulId = document.getElementById('vendaPulseira').value;
+  const qtd = parseInt(document.getElementById('vendaQtd').value) || 1;
+  const valor = parseFloat(document.getElementById('vendaValor').value) || 0;
+  const data = document.getElementById('vendaData').value;
+  if (!pulId) return toast('Selecione uma pulseira', 'error');
+  if (!valor) return toast('Informe o valor da venda', 'error');
+
+  const p = state.pulseiras.find(x => x.id === pulId);
+  if (!p) return;
+  if (p.qtd < qtd) return toast('Estoque insuficiente (' + p.qtd + ' un)', 'error');
+
+  p.qtd -= qtd;
+
+  state.vendas.push({ id: gerarId(), pulseiraId: pulId, nome: p.nome, qtd, valor, data: data || new Date().toISOString().substr(0,10) });
+  state.financeiro.push({ id: gerarId(), tipo: 'entrada', valor, desc: `Venda: ${p.nome} × ${qtd}`, data: data || new Date().toISOString().substr(0,10) });
+
+  salvarState();
+  renderVendas();
+  renderFinanceiro();
+  toast('Venda registrada! ' + fmt(valor));
+}
+
+function renderVendas() {
+  const el = document.getElementById('listaVendas');
+  const lista = [...state.vendas].reverse();
+  if (lista.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🛍</div><p>Nenhuma venda registrada</p></div>';
+    return;
+  }
+  el.innerHTML = lista.map(v => `
+    <div class="mov-item">
+      <div class="mov-info">
+        <div class="mov-desc">${v.nome} × ${v.qtd}</div>
+        <div class="mov-date">${fmtData(v.data)}</div>
+      </div>
+      <div class="mov-value entrada">${fmt(v.valor)}</div>
+    </div>
+  `).join('');
+
+  // Definir data padrão
+  document.getElementById('vendaData').value = new Date().toISOString().substr(0,10);
+}
+
+// ===================================================================
+// FINANCEIRO
+// ===================================================================
+function lancarMovimento() {
+  const tipo = document.getElementById('finTipo').value;
+  const valor = parseFloat(document.getElementById('finValor').value) || 0;
+  const desc = document.getElementById('finDesc').value.trim();
+  if (!valor) return toast('Informe o valor', 'error');
+
+  state.financeiro.push({ id: gerarId(), tipo, valor, desc: desc || tipo, data: new Date().toISOString().substr(0,10) });
+  salvarState();
+  renderFinanceiro();
+  document.getElementById('finValor').value = '';
+  document.getElementById('finDesc').value = '';
+  toast('Lançamento registrado!');
+}
+
+function renderFinanceiro() {
+  let entradas = 0, saidas = 0, retiradas = 0;
+  state.financeiro.forEach(m => {
+    if (m.tipo === 'entrada') entradas += m.valor;
+    else if (m.tipo === 'saida') saidas += m.valor;
+    else if (m.tipo === 'retirada') retiradas += m.valor;
+  });
+  const saldo = entradas - saidas - retiradas;
+
+  // Lucro: entradas de vendas menos custo dos produtos vendidos
+  let receita = 0, custo = 0;
+  state.vendas.forEach(v => { receita += v.valor; });
+  state.vendas.forEach(v => {
+    const p = state.pulseiras.find(x => x.id === v.pulseiraId);
+    if (p) custo += p.custo * v.qtd;
+  });
+  const lucro = receita - custo;
+
+  document.getElementById('finSaldo').textContent = fmt(saldo);
+  document.getElementById('finEntradas').textContent = fmt(entradas);
+  document.getElementById('finSaidas').textContent = fmt(saidas);
+  document.getElementById('finRetiradas').textContent = fmt(retiradas);
+  document.getElementById('finLucro').textContent = fmt(lucro);
+
+  // Também atualiza painel
+  document.getElementById('dSaldo').textContent = fmt(saldo);
+
+  const el = document.getElementById('listaFinanceiro');
+  const lista = [...state.financeiro].reverse();
+  if (lista.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">💳</div><p>Nenhuma movimentação registrada</p></div>';
+    return;
+  }
+  el.innerHTML = lista.map(m => `
+    <div class="mov-item">
+      <div class="mov-info">
+        <div class="mov-desc">${m.desc}</div>
+        <div class="mov-date">${fmtData(m.data)}</div>
+      </div>
+      <div class="mov-value ${m.tipo}">
+        ${m.tipo === 'entrada' ? '+' : '-'}${fmt(m.valor)}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===================================================================
+// RENDER GERAL
+// ===================================================================
+function renderAll() {
+  renderPainel();
+  renderMateriais();
+  renderPulseiras();
+  renderSelectPulseiras();
+  renderVendas();
+  renderProducao();
+  renderFinanceiro();
+  verificarAlertas();
+}
+
+// ===================================================================
+// INICIALIZAÇÃO
+// ===================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  carregarState();
+  renderAll();
+
+  // Definir data de hoje nos campos de data
+  const hoje = new Date().toISOString().substr(0, 10);
+  const dataVenda = document.getElementById('vendaData');
+  if (dataVenda) dataVenda.value = hoje;
+});
+</script>
+</body>
+</html>

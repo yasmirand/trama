@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trama — Gestão de Pulseiras</title>
+<title>Ateliê — Gestão de Pulseiras</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ===== RESET & VARIÁVEIS ===== */
@@ -543,7 +543,7 @@
 
 <!-- HEADER -->
 <header class="app-header">
-  <h1>Trama <em>Pulseiras</em></h1>
+  <h1>Ateliê <em>Pulseiras</em></h1>
   <p>Sistema de Gestão Artesanal</p>
 </header>
 
@@ -1606,12 +1606,29 @@ function lancarMovimento() {
   const desc = document.getElementById('finDesc').value.trim();
   if (!valor) return toast('Informe o valor', 'error');
 
-  state.financeiro.push({ id: gerarId(), tipo, valor, desc: desc || tipo, data: new Date().toISOString().substr(0,10) });
+  const hoje = new Date().toISOString().substr(0,10);
+  state.financeiro.push({ id: gerarId(), tipo, valor, desc: desc || tipo, data: hoje });
+
+  // ── INTEGRAÇÃO: retirada da empresa → entrada no financeiro pessoal ──
+  if (tipo === 'retirada') {
+    if (!state.pessoal) state.pessoal = [];
+    const origemDesc = (desc ? desc + ' ' : '') + '(Retirada da empresa)';
+    state.pessoal.push({
+      id: gerarId(),
+      tipo: 'entrada',
+      valor,
+      categoria: 'retirada',
+      desc: origemDesc,
+      data: hoje
+    });
+  }
+
   salvarState();
   renderFinanceiro();
+  renderPessoal();
   document.getElementById('finValor').value = '';
   document.getElementById('finDesc').value = '';
-  toast('Lançamento registrado!');
+  toast(tipo === 'retirada' ? 'Retirada registrada e lançada no Financeiro Pessoal!' : 'Lançamento registrado!');
 }
 
 function renderFinanceiro() {

@@ -607,36 +607,41 @@
   <p class="section-title">Estoque de Materiais</p>
 
   <div class="form-card">
-    <h3>➕ Cadastrar Material</h3>
+    <h3>➕ Cadastrar Novo Material</h3>
+    
     <div class="form-row">
       <div>
-        <label>Nome do Material</label>
-        <input type="text" id="matNome" placeholder="ex: Miçanga rosa">
+        <label for="matNome">Nome do Material</label>
+        <input type="text" id="matNome" placeholder="ex: Miçanga rosa" autocomplete="off">
       </div>
       <div>
-        <label>Unidade</label>
+        <label for="matUnidade">Unidade</label>
         <select id="matUnidade">
-          <option value="unid">unid</option>
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-          <option value="cm">cm</option>
-          <option value="m">m</option>
-          <option value="rolo">rolo</option>
-          <option value="pct">pct</option>
+          <option value="unid">Unidade (unid)</option>
+          <option value="g">Gramas (g)</option>
+          <option value="kg">Quilogramas (kg)</option>
+          <option value="cm">Centímetros (cm)</option>
+          <option value="m">Metros (m)</option>
+          <option value="rolo">Rolo</option>
+          <option value="pct">Pacote (pct)</option>
         </select>
       </div>
     </div>
+
     <div class="form-row">
       <div>
-        <label>Quantidade Inicial</label>
+        <label for="matQtd">Quantidade Inicial</label>
         <input type="number" id="matQtd" placeholder="0" min="0" step="any">
       </div>
       <div>
-        <label>Custo por Unidade (R$)</label>
+        <label for="matCusto">Custo por Unidade (R$)</label>
         <input type="number" id="matCusto" placeholder="0.00" min="0" step="0.01">
       </div>
     </div>
-    <button class="btn btn-primary" onclick="cadastrarMaterial()">Cadastrar Material</button>
+
+    <button class="btn btn-primary" onclick="cadastrarMaterial()">
+      Cadastrar Material
+    </button>
   </div>
 
   <div class="divider">Lista de Materiais</div>
@@ -681,59 +686,116 @@
   <p class="section-title">Calculadora de Custo</p>
 
   <div class="calc-result" id="calcResult">
-    <div class="result-label">Preço Final Sugerido</div>
-    <div class="result-value" id="calcPrecoFinal">R$ 0,00</div>
-    <div class="result-sub" id="calcSub">Preencha os campos abaixo</div>
-    <div class="calc-breakdown" id="calcBreakdown" style="display:none">
-      <div class="calc-breakdown-row"><span>Miçangas</span><span id="bMicanga">R$ 0,00</span></div>
-      <div class="calc-breakdown-row"><span>Fio</span><span id="bFio">R$ 0,00</span></div>
-      <div class="calc-breakdown-row"><span>Pingente/Fecho</span><span id="bPingente">R$ 0,00</span></div>
-      <div class="calc-breakdown-row"><span>Mão de obra</span><span id="bMaoObra">R$ 0,00</span></div>
-      <div class="calc-breakdown-row total"><span>Custo Total</span><span id="bTotal">R$ 0,00</span></div>
-      <div class="calc-breakdown-row total" style="margin-top:2px;border:none"><span>+ Margem</span><span id="bMargem">R$ 0,00</span></div>
+  
+  <div class="result-label">Preço Final Sugerido</div>
+  <div class="result-value" id="calcPrecoFinal">R$ 0,00</div>
+  
+  <!-- Texto abaixo do preço -->
+  <div class="result-sub" id="calcSub">Preencha os campos abaixo</div>
+
+  <!-- Detalhamento -->
+  <div class="calc-breakdown" id="calcBreakdown" style="display:none">
+
+    <!-- Materiais -->
+    <div class="calc-breakdown-row">
+      <span>Miçangas</span>
+      <span id="bMicanga">R$ 0,00</span>
+    </div>
+
+    <div class="calc-breakdown-row">
+      <span>Fio</span>
+      <span id="bFio">R$ 0,00</span>
+    </div>
+
+    <div class="calc-breakdown-row">
+      <span>Pingente</span>
+      <span id="bPingente">R$ 0,00</span>
+    </div>
+
+    <!-- Trabalho (agora baseado em tempo) -->
+    <div class="calc-breakdown-row">
+      <span>Trabalho (tempo)</span>
+      <span id="bMaoObra">R$ 0,00</span>
+    </div>
+
+    <!-- Total -->
+    <div class="calc-breakdown-row total">
+      <span>Custo Total</span>
+      <span id="bTotal">R$ 0,00</span>
+    </div>
+
+    <!-- Margem -->
+    <div class="calc-breakdown-row total" style="margin-top:2px;border:none">
+      <span>+ Margem</span>
+      <span id="bMargem">R$ 0,00</span>
+    </div>
+
+  </div>
+</div>
+
+  <div class="form-card">
+  <h3>Composição da Pulseira</h3>
+
+  <!-- MIÇANGAS -->
+  <div class="form-row">
+    <div>
+      <label>Qtd de Miçangas</label>
+      <input type="number" id="cMicangaQtd" placeholder="ex: 10" oninput="calcular()">
+    </div>
+    <div>
+      <label>Custo unitário (R$)</label>
+      <input type="number" id="cMicangaCusto" placeholder="ex: 0.05" step="0.001" oninput="calcular()">
     </div>
   </div>
 
-  <div class="form-card">
-    <h3>Composição da Pulseira</h3>
-    <div class="form-row">
-      <div>
-        <label>Qtd de Miçangas</label>
-        <input type="number" id="cMicangaQtd" placeholder="ex: 50" oninput="calcular()">
-      </div>
-      <div>
-        <label>Custo unitário (R$)</label>
-        <input type="number" id="cMicangaCusto" placeholder="ex: 0.05" step="0.001" oninput="calcular()">
-      </div>
+  <!-- FIO -->
+  <div class="form-row">
+    <div>
+      <label>Tamanho do Fio (cm)</label>
+      <input type="number" id="cFioTam" placeholder="ex: 100" oninput="calcular()">
     </div>
-    <div class="form-row">
-      <div>
-        <label>Tamanho do Fio (cm)</label>
-        <input type="number" id="cFioTam" placeholder="ex: 25" oninput="calcular()">
-      </div>
-      <div>
-        <label>Custo por cm (R$)</label>
-        <input type="number" id="cFioCusto" placeholder="ex: 0.08" step="0.001" oninput="calcular()">
-      </div>
-    </div>
-    <div class="form-row">
-      <div>
-        <label>Pingente + Fecho (R$)</label>
-        <input type="number" id="cPingente" placeholder="ex: 1.50" step="0.01" oninput="calcular()">
-      </div>
-      <div>
-        <label>Mão de obra (R$)</label>
-        <input type="number" id="cMaoObra" placeholder="ex: 5.00" step="0.01" oninput="calcular()">
-      </div>
-    </div>
-    <hr>
-    <div class="margin-row">
-      <label>Margem de Lucro:</label>
-      <input type="number" id="cMargem" value="50" min="0" max="1000" step="1" oninput="calcular()" style="max-width:70px">
-      <span>%</span>
-      <span class="margin-preview" id="marginPreview"></span>
+    <div>
+      <label>Custo por cm (R$)</label>
+      <input type="number" id="cFioCusto" placeholder="ex: 0.08" step="0.001" oninput="calcular()">
     </div>
   </div>
+
+  <!-- PINGENTE + FECHO (AGORA IGUAL AO FIO) -->
+  <div class="form-row">
+    <div>
+      <label>QTD de Pingente</label>
+      <input type="number" id="cPingenteQtd" placeholder="ex: 1" oninput="calcular()">
+    </div>
+    <div>
+      <label>Custo unitário (R$)</label>
+      <input type="number" id="cPingenteCusto" placeholder="ex: 1.50" step="0.01" oninput="calcular()">
+    </div>
+  </div>
+
+  <!-- TEMPO DE TRABALHO (substitui mão de obra) -->
+  <div class="form-row">
+    <!-- Tempo agora em MINUTOS -->
+    <div>
+      <label>Tempo (minutos)</label>
+      <input type="number" id="cTempo" placeholder="ex: 30" oninput="calcular()">
+    </div>
+
+    <div>
+      <label>Custo por minuto (R$)</label>
+      <input type="number" id="cValorMinuto" placeholder="ex: 0.20" step="0.01" oninput="calcular()">
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- MARGEM -->
+  <div class="margin-row">
+    <label>Margem de Lucro:</label>
+    <input type="number" id="cMargem" value="50" min="0" max="1000" step="1" oninput="calcular()" style="max-width:70px">
+    <span>%</span>
+    <span class="margin-preview" id="marginPreview"></span>
+  </div>
+</div>
 
   <div class="form-card">
     <h3>💾 Salvar como Pulseira</h3>
@@ -741,6 +803,20 @@
       <div>
         <label>Nome do Modelo</label>
         <input type="text" id="cNome" placeholder="Nome da pulseira">
+      </div>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Preço sugerido (R$)</label>
+        <input type="number" id="precoSugerido" readonly>
+      </div>
+
+      <div>
+        <label>Preço final (editável)</label>
+        <input type="number" 
+          id="precoFinalEditavel" 
+          step="0.01" 
+          oninput="this.dataset.editado='true'">
       </div>
     </div>
     <button class="btn btn-sage" onclick="salvarDaCalculadora()">Salvar Pulseira no Sistema</button>
@@ -1200,28 +1276,65 @@ function renderPainel() {
 // MATERIAIS
 // ===================================================================
 function cadastrarMaterial() {
-  const nome = document.getElementById('matNome').value.trim();
-  const unidade = document.getElementById('matUnidade').value;
-  const qtd = parseFloat(document.getElementById('matQtd').value) || 0;
-  const custo = parseFloat(document.getElementById('matCusto').value) || 0;
-  if (!nome) return toast('Digite o nome do material', 'error');
+  const nome = document.getElementById("matNome").value.trim();
+  const unidadeInput = document.getElementById("matUnidade").value;
+  let qtd = parseFloat(document.getElementById("matQtd").value) || 0;
+  let custoUnit = parseFloat(document.getElementById("matCusto").value) || 0;
 
-  state.materiais.push({ id: gerarId(), nome, unidade, qtd, custo });
+  if (!nome) return toast("Informe o nome do material", "error");
+  if (qtd <= 0) return toast("Quantidade deve ser maior que zero", "error");
+  if (custoUnit <= 0) return toast("Custo deve ser maior que zero", "error");
+
+  let qtdPadronizada = qtd;
+  let custoPadronizado = custoUnit;
+  let unidadeBase = unidadeInput;
+
+  if (unidadeInput === "m") {
+    qtdPadronizada = qtd * 100;
+    custoPadronizado = custoUnit / 100;
+    unidadeBase = "cm";
+  } else if (unidadeInput === "kg") {
+    qtdPadronizada = qtd * 1000;
+    custoPadronizado = custoUnit / 1000;
+    unidadeBase = "g";
+  }
+
+  state.materiais.push({
+    id: gerarId(),
+    nome: nome,
+    unidadeBase: unidadeBase,
+    quantidade: qtdPadronizada,
+    custo: custoPadronizado,
+    dataCadastro: new Date().toISOString()
+  });
+
   salvarState();
   renderMateriais();
-  toast('Material cadastrado!');
-  ['matNome','matQtd','matCusto'].forEach(id => document.getElementById(id).value = '');
+  toast("Material cadastrado com sucesso!");
 }
 
 function renderMateriais() {
   const el = document.getElementById('listaMateriais');
+  
   if (state.materiais.length === 0) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Nenhum material cadastrado ainda</p></div>';
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <p>Nenhum material cadastrado ainda</p>
+      </div>`;
     return;
   }
+
   el.innerHTML = state.materiais.map(m => {
-    const badge = m.qtd <= 0 ? 'badge-zero' : m.qtd <= 5 ? 'badge-low' : 'badge-ok';
-    const badgeText = m.qtd <= 0 ? 'Zerado!' : m.qtd <= 5 ? 'Baixo' : 'OK';
+    const unidade = m.unidadeBase || m.unidade;
+    const total = m.quantidade * m.custo;
+    
+    const badge = m.quantidade <= 0 ? 'badge-zero' : 
+                 m.quantidade <= 5 ? 'badge-low' : 'badge-ok';
+                 
+    const badgeText = m.quantidade <= 0 ? 'Zerado!' : 
+                     m.quantidade <= 5 ? 'Baixo' : 'OK';
+
     return `
       <div class="item-card">
         <div class="item-header">
@@ -1229,9 +1342,9 @@ function renderMateriais() {
           <span class="item-badge ${badge}">${badgeText}</span>
         </div>
         <div class="item-details">
-          <div class="item-detail">Qtd: <strong>${m.qtd} ${m.unidade}</strong></div>
-          <div class="item-detail">Custo: <strong>${fmt(m.custo)}/${m.unidade}</strong></div>
-          <div class="item-detail">Total: <strong>${fmt(m.qtd * m.custo)}</strong></div>
+          <div class="item-detail">Qtd: <strong>${m.quantidade} ${unidade}</strong></div>
+          <div class="item-detail">Custo: <strong>${fmt(m.custo)}/${unidade}</strong></div>
+          <div class="item-detail">Total: <strong>${fmt(total)}</strong></div>
         </div>
         <div class="item-actions">
           <button class="btn btn-sm btn-sage" onclick="abrirModalMov('${m.id}')">📥 Movimentar</button>
@@ -1245,11 +1358,13 @@ function renderMateriais() {
 function abrirModalMov(id) {
   const m = state.materiais.find(x => x.id === id);
   if (!m) return;
+
   document.getElementById('modalMovId').value = id;
   document.getElementById('modalMovTitulo').textContent = 'Movimentar: ' + m.nome;
   document.getElementById('modalMovQtd').value = '';
   document.getElementById('modalMovObs').value = '';
   document.getElementById('modalMovTipo').value = 'entrada';
+  
   abrirModal('modalMovMaterial');
 }
 
@@ -1257,27 +1372,43 @@ function salvarMovMaterial() {
   const id = document.getElementById('modalMovId').value;
   const tipo = document.getElementById('modalMovTipo').value;
   const qtd = parseFloat(document.getElementById('modalMovQtd').value);
-  const obs = document.getElementById('modalMovObs').value;
-  if (!qtd || qtd <= 0) return toast('Informe a quantidade', 'error');
+  const obs = document.getElementById('modalMovObs').value.trim();
+
+  if (!qtd || qtd <= 0) return toast('Informe uma quantidade válida', 'error');
 
   const m = state.materiais.find(x => x.id === id);
   if (!m) return;
 
+  const unidade = m.unidadeBase || m.unidade;
+
   if (tipo === 'entrada') {
-    m.qtd += qtd;
-    // Lançar no financeiro
+    m.quantidade += qtd;
+
+    // Lançar no financeiro (compra)
     state.financeiro.push({
-      id: gerarId(), tipo: 'saida',
+      id: gerarId(),
+      tipo: 'saida',
       valor: qtd * m.custo,
-      desc: obs || ('Compra: ' + m.nome + ' (' + qtd + ' ' + m.unidade + ')'),
+      desc: obs || ('Compra: ' + m.nome + ' (' + qtd + ' ' + unidade + ')'),
       data: new Date().toISOString().substr(0, 10)
     });
   } else {
-    if (m.qtd < qtd) return toast('Estoque insuficiente (' + m.qtd + ' ' + m.unidade + ')', 'error');
-    m.qtd -= qtd;
+    if (m.quantidade < qtd) {
+      return toast(`Estoque insuficiente! (${m.quantidade} ${unidade})`, 'error');
+    }
+    m.quantidade -= qtd;
   }
 
-  state.historico.push({ id: gerarId(), tipo, desc: m.nome, qtd, data: new Date().toISOString() });
+  // Registro no histórico
+  state.historico.push({
+    id: gerarId(),
+    tipo,
+    desc: m.nome,
+    qtd,
+    unidade,
+    data: new Date().toISOString()
+  });
+
   salvarState();
   fecharModal('modalMovMaterial');
   renderMateriais();
@@ -1285,11 +1416,12 @@ function salvarMovMaterial() {
 }
 
 function excluirMaterial(id) {
-  if (!confirm('Excluir este material?')) return;
+  if (!confirm('Tem certeza que deseja excluir este material?')) return;
+  
   state.materiais = state.materiais.filter(m => m.id !== id);
   salvarState();
   renderMateriais();
-  toast('Material excluído');
+  toast('Material excluído com sucesso');
 }
 
 // ===================================================================
@@ -1413,48 +1545,108 @@ function salvarReceita() {
 // CALCULADORA
 // ===================================================================
 function calcular() {
-  const micQtd = parseFloat(document.getElementById('cMicangaQtd').value) || 0;
-  const micCusto = parseFloat(document.getElementById('cMicangaCusto').value) || 0;
-  const fioTam = parseFloat(document.getElementById('cFioTam').value) || 0;
-  const fioCusto = parseFloat(document.getElementById('cFioCusto').value) || 0;
-  const pingente = parseFloat(document.getElementById('cPingente').value) || 0;
-  const maoObra = parseFloat(document.getElementById('cMaoObra').value) || 0;
-  const margem = parseFloat(document.getElementById('cMargem').value) || 0;
 
-  const vMicanga = micQtd * micCusto;
-  const vFio = fioTam * fioCusto;
-  const total = vMicanga + vFio + pingente + maoObra;
-  const vMargem = total * margem / 100;
+  // MIÇANGAS
+  const qtdMicangas = parseFloat(document.getElementById("cMicangaQtd").value) || 0;
+  const custoMicanga = parseFloat(document.getElementById("cMicangaCusto").value) || 0;
+  const custoMicangas = qtdMicangas * custoMicanga;
+
+  // FIO
+  const tamFio = parseFloat(document.getElementById("cFioTam").value) || 0;
+  const custoFioCm = parseFloat(document.getElementById("cFioCusto").value) || 0;
+  const custoFio = tamFio * custoFioCm;
+
+  // PINGENTE + FECHO
+  const qtdPingente = parseFloat(document.getElementById("cPingenteQtd").value) || 0;
+  const custoPingenteUnit = parseFloat(document.getElementById("cPingenteCusto").value) || 0;
+  const custoPingente = qtdPingente * custoPingenteUnit;
+
+  // ⏱️ TEMPO EM MINUTOS
+  const tempoMin = parseFloat(document.getElementById("cTempo").value) || 0;
+  const valorMinuto = parseFloat(document.getElementById("cValorMinuto").value) || 0;
+  const custoTrabalho = tempoMin * valorMinuto;
+
+  // 💰 TOTAL
+  const total = custoMicangas + custoFio + custoPingente + custoTrabalho;
+
+  // 📊 MARGEM
+  const margem = parseFloat(document.getElementById("cMargem").value) || 0;
+  const vMargem = total * (margem / 100);
+
+  // 💸 PREÇO FINAL
   const precoFinal = total + vMargem;
 
+  // 🖥️ ATUALIZA NA TELA
   document.getElementById('calcPrecoFinal').textContent = fmt(precoFinal);
   document.getElementById('calcSub').textContent = `Custo: ${fmt(total)} + Margem ${margem}%`;
+
   document.getElementById('calcBreakdown').style.display = total > 0 ? 'block' : 'none';
-  document.getElementById('bMicanga').textContent = fmt(vMicanga);
-  document.getElementById('bFio').textContent = fmt(vFio);
-  document.getElementById('bPingente').textContent = fmt(pingente);
-  document.getElementById('bMaoObra').textContent = fmt(maoObra);
+
+  // 🔍 DETALHAMENTO
+  document.getElementById('bMicanga').textContent = fmt(custoMicangas);
+  document.getElementById('bFio').textContent = fmt(custoFio);
+  document.getElementById('bPingente').textContent = fmt(custoPingente);
+  document.getElementById('bMaoObra').textContent = fmt(custoTrabalho);
   document.getElementById('bTotal').textContent = fmt(total);
   document.getElementById('bMargem').textContent = '+' + fmt(vMargem);
-  document.getElementById('marginPreview').textContent = total > 0 ? `→ ${fmt(precoFinal)}` : '';
+
+  document.getElementById('marginPreview').textContent =
+    total > 0 ? `→ ${fmt(precoFinal)}` : '';
+  // Atualiza os campos de preço
+  document.getElementById("precoSugerido").value = precoFinal.toFixed(2);
+
+  // Só preenche o editável se estiver vazio (não sobrescreve edição manual)
+  const campoEditavel = document.getElementById("precoFinalEditavel");
+  // Se o usuário ainda não mexeu manualmente, atualiza automático
+  if (campoEditavel.dataset.editado !== "true") {
+    campoEditavel.value = precoFinal.toFixed(2);
+  }
 }
 
 function salvarDaCalculadora() {
   const nome = document.getElementById('cNome').value.trim();
   if (!nome) return toast('Informe o nome da pulseira', 'error');
 
+  // MIÇANGAS
   const micQtd = parseFloat(document.getElementById('cMicangaQtd').value) || 0;
   const micCusto = parseFloat(document.getElementById('cMicangaCusto').value) || 0;
+  const custoMicangas = micQtd * micCusto;
+
+  // FIO
   const fioTam = parseFloat(document.getElementById('cFioTam').value) || 0;
   const fioCusto = parseFloat(document.getElementById('cFioCusto').value) || 0;
-  const pingente = parseFloat(document.getElementById('cPingente').value) || 0;
-  const maoObra = parseFloat(document.getElementById('cMaoObra').value) || 0;
-  const margem = parseFloat(document.getElementById('cMargem').value) || 0;
+  const custoFio = fioTam * fioCusto;
 
-  const custo = (micQtd * micCusto) + (fioTam * fioCusto) + pingente + maoObra;
-  const preco = custo * (1 + margem / 100);
+  // PINGENTE (novo formato)
+  const qtdPingente = parseFloat(document.getElementById('cPingenteQtd').value) || 0;
+  const custoPingenteUnit = parseFloat(document.getElementById('cPingenteCusto').value) || 0;
+  const custoPingente = qtdPingente * custoPingenteUnit;
 
-  state.pulseiras.push({ id: gerarId(), nome, custo, preco, qtd: 0, receita: [] });
+  // TEMPO (minuto)
+  const tempo = parseFloat(document.getElementById('cTempo').value) || 0;
+  const valorMinuto = parseFloat(document.getElementById('cValorMinuto').value) || 0;
+  const custoTrabalho = tempo * valorMinuto;
+
+  // TOTAL
+  const custo = custoMicangas + custoFio + custoPingente + custoTrabalho;
+
+  // 💰 PREÇO FINAL (PEGA DO CAMPO EDITÁVEL)
+  let preco = parseFloat(document.getElementById("precoFinalEditavel").value);
+
+  if (!preco || preco <= 0) {
+    return toast("Defina um preço válido antes de salvar", "error");
+  }
+
+  // SALVA
+  state.pulseiras.push({
+    id: gerarId(),
+    nome,
+    custo,
+    preco,
+    qtd: 0,
+    receita: []
+  });
+
   salvarState();
   toast('Pulseira "' + nome + '" salva no sistema!');
   document.getElementById('cNome').value = '';

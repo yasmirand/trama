@@ -10,7 +10,7 @@ const DB = {
   // chaves antigas (mantidas por compatibilidade) + novas chaves
   KEYS: [
     'clientes', 'materiais', 'movimentos', 'artesas', 'despesas', // antigas
-    'vendas', 'produtos',                                        // antigas (legado, não usadas na UI nova)
+    'vendas', 'produtos', 'horas',                                // antigas (legado, não usadas na UI nova)
     'pulseiras', 'producoes', 'pedidos'                           // novas
   ],
 
@@ -64,7 +64,58 @@ const DB = {
     }));
     this.set('pulseiras', pulseirasAtualizadas);
 
-    // 4) garante campos novos em artesãs (produção automática)
+    // 4) migra "vendas" (sistema antigo, pré-"Pedidos") -> "pedidos" (novo)
+    //    só roda se ainda não existir nenhum pedido, para não duplicar.
+    //    Vendas cujo produto não bate com nenhuma pulseira cadastrada ganham
+    //    uma pulseira "esboço" automaticamente, para não perder o histórico.
+    const pedidos = this.get('pedidos');
+    const vendasLegado = this.get('vendas');
+    if (pedidos.length === 0 && vendasLegado.length > 0) {
+      const pulseirasAtuais = this.get('pulseiras');
+      const pedidosMigrados = vendasLegado.map(v => {
+        const nomeProduto = v.produto || 'Produto (venda antiga)';
+        const chave = normaliza(nomeProduto);
+        let pulseira = pulseirasAtuais.find(p => normaliza(p.nome) === chave);
+        if (!pulseira) {
+          pulseira = {
+            id: uid(), nome: nomeProduto, precoPadrao: v.valorUnit || 0, custoMedio: 0,
+            tempoMedio: 0, estoque: 0, vendidas: 0, brindes: 0, sorteios: 0,
+            unidadesProduzidas: 0, materiais: [], criadoEm: v.data || today()
+          };
+          pulseirasAtuais.push(pulseira);
+        }
+        pulseira.vendidas = (pulseira.vendidas || 0) + (v.qtd || 0);
+        const total = v.total || 0;
+        const totalPendente = v.totalPendente || 0;
+        const valorPago = Math.max(total - totalPendente, 0);
+        return {
+          id: v.id || uid(), clienteId: v.clienteId || '', cliente: v.cliente || '',
+          pulseiraId: pulseira.id, pulseira: pulseira.nome,
+          tipo: 'venda', qtd: v.qtd || 0, precoPadrao: pulseira.precoPadrao,
+          precoUnit: v.valorUnit || 0, total,
+          formaPagamento: '', valorPago, valorRestante: totalPendente, custoTotal: 0,
+          obs: v.obs || '', status: 'entregue', dataConclusao: v.data || today(),
+          data: v.data || today()
+        };
+      });
+      this.set('pulseiras', pulseirasAtuais);
+      this.set('pedidos', pedidosMigrados);
+      toastSeguro('Vendas antigas migradas para "Pedidos".');
+    }
+
+    // 5) garante categoria nas despesas antigas (sem o campo "categ").
+    //    Se a descrição já mencionar "brinde" ou "sorteio", categoriza automaticamente.
+    const despesas = this.get('despesas').map(d => {
+      if (d.categ) return d;
+      const desc = normaliza(d.desc || '');
+      let categ = 'outras';
+      if (desc.includes('sorteio')) categ = 'sorteios';
+      else if (desc.includes('brinde')) categ = 'brindes';
+      return { ...d, categ };
+    });
+    this.set('despesas', despesas);
+
+    // 6) garante campos novos em artesãs (produção automática)
     const artesas = this.get('artesas').map(a => ({ totalProduzido: 0, totalRecebido: 0, ultimaProducao: null, ...a }));
     this.set('artesas', artesas);
   }

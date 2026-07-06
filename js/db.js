@@ -64,14 +64,32 @@ const DB = {
     }));
     this.set('pulseiras', pulseirasAtualizadas);
 
-    // 4) migra "vendas" (sistema antigo, pré-"Pedidos") -> "pedidos" (novo)
+    // 4) categoriza despesas antigas (sem o campo "categ").
+    //    Se a descrição já mencionar "brinde" ou "sorteio", categoriza automaticamente.
+    const despesasCateg = this.get('despesas').map(d => {
+      if (d.categ) return d;
+      const desc = normaliza(d.desc || '');
+      let categ = 'outras';
+      if (desc.includes('sorteio')) categ = 'sorteios';
+      else if (desc.includes('brinde')) categ = 'brindes';
+      return { ...d, categ };
+    });
+
+    // 5) migra "vendas" (sistema antigo, pré-"Pedidos") -> "pedidos" (novo)
     //    só roda se ainda não existir nenhum pedido, para não duplicar.
     //    Vendas cujo produto não bate com nenhuma pulseira cadastrada ganham
     //    uma pulseira "esboço" automaticamente, para não perder o histórico.
+    //    Vendas que na verdade eram brinde/sorteio (registradas manualmente como
+    //    venda + uma despesa avulsa com mesma data/valor no sistema antigo) são
+    //    detectadas e fundidas num único pedido do tipo certo, sem gerar receita
+    //    nem duplicar a despesa.
     const pedidos = this.get('pedidos');
     const vendasLegado = this.get('vendas');
+    let despesasFinal = despesasCateg;
     if (pedidos.length === 0 && vendasLegado.length > 0) {
       const pulseirasAtuais = this.get('pulseiras');
+      const despesasRestantes = [...despesasCateg];
+
       const pedidosMigrados = vendasLegado.map(v => {
         const nomeProduto = v.produto || 'Produto (venda antiga)';
         const chave = normaliza(nomeProduto);
@@ -84,8 +102,33 @@ const DB = {
           };
           pulseirasAtuais.push(pulseira);
         }
-        pulseira.vendidas = (pulseira.vendidas || 0) + (v.qtd || 0);
+
         const total = v.total || 0;
+        // procura uma despesa de brinde/sorteio com a mesma data e o mesmo valor
+        const despesaIdx = despesasRestantes.findIndex(d =>
+          (d.categ === 'brindes' || d.categ === 'sorteios') &&
+          d.data === v.data && Math.abs((d.valor || 0) - total) < 0.01
+        );
+
+        if (despesaIdx >= 0) {
+          const despesa = despesasRestantes[despesaIdx];
+          despesasRestantes.splice(despesaIdx, 1); // a despesa avulsa vira parte do pedido, não duplica
+          const tipoPedido = despesa.categ === 'brindes' ? 'brinde' : 'sorteio';
+          if (tipoPedido === 'brinde') pulseira.brindes = (pulseira.brindes || 0) + (v.qtd || 0);
+          else pulseira.sorteios = (pulseira.sorteios || 0) + (v.qtd || 0);
+          return {
+            id: v.id || uid(), clienteId: v.clienteId || '', cliente: v.cliente || '',
+            pulseiraId: pulseira.id, pulseira: pulseira.nome,
+            tipo: tipoPedido, qtd: v.qtd || 0, precoPadrao: pulseira.precoPadrao,
+            precoUnit: 0, total: 0,
+            formaPagamento: '', valorPago: 0, valorRestante: 0, custoTotal: despesa.valor || 0,
+            obs: v.obs || '', status: 'entregue', dataConclusao: v.data || today(),
+            data: v.data || today()
+          };
+        }
+
+        // venda normal
+        pulseira.vendidas = (pulseira.vendidas || 0) + (v.qtd || 0);
         const totalPendente = v.totalPendente || 0;
         const valorPago = Math.max(total - totalPendente, 0);
         return {
@@ -98,22 +141,13 @@ const DB = {
           data: v.data || today()
         };
       });
+
       this.set('pulseiras', pulseirasAtuais);
       this.set('pedidos', pedidosMigrados);
+      despesasFinal = despesasRestantes;
       toastSeguro('Vendas antigas migradas para "Pedidos".');
     }
-
-    // 5) garante categoria nas despesas antigas (sem o campo "categ").
-    //    Se a descrição já mencionar "brinde" ou "sorteio", categoriza automaticamente.
-    const despesas = this.get('despesas').map(d => {
-      if (d.categ) return d;
-      const desc = normaliza(d.desc || '');
-      let categ = 'outras';
-      if (desc.includes('sorteio')) categ = 'sorteios';
-      else if (desc.includes('brinde')) categ = 'brindes';
-      return { ...d, categ };
-    });
-    this.set('despesas', despesas);
+    this.set('despesas', despesasFinal);
 
     // 6) garante campos novos em artesãs (produção automática)
     const artesas = this.get('artesas').map(a => ({ totalProduzido: 0, totalRecebido: 0, ultimaProducao: null, ...a }));

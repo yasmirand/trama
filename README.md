@@ -1,132 +1,265 @@
-# ✨ Sistema de Gestão - Pulseiras Artesanais
+# ✨ Sistema de Gestão - Trama
 
-Sistema simples para gerenciamento de uma pequena empresa de pulseiras artesanais, incluindo controle de estoque, vendas, custos e finanças.
+Sistema desenvolvido para gerenciar a produção, estoque, pedidos e financeiro da **Trama**, uma empresa de pulseiras artesanais.
 
----
-
-## 🚀 Funcionalidades
-
-### 📦 Estoque de Materiais
-
-* Cadastro de materiais (miçangas, fio, pingentes, fechos, etc.)
-* Controle de quantidade disponível
-* Atualização automática ao produzir pulseiras
-* Registro de entradas (compras) e saídas (uso)
+O objetivo é facilitar o controle completo do negócio, desde a compra dos materiais até a entrega dos pedidos, mantendo o financeiro sempre organizado.
 
 ---
 
-### ✨ Estoque de Pulseiras
+# 🚀 Funcionalidades
 
-* Cadastro de modelos de pulseiras
-* Controle de quantidade em estoque
-* Atualização automática ao produzir e vender
-* Armazenamento de custo e preço de venda
+## 📊 Dashboard
 
----
+Painel com indicadores gerais da empresa.
 
-### 🧮 Calculadora de Preço
-
-* Cálculo automático de custo baseado em:
-
-  * Miçangas (quantidade × custo unitário)
-  * Fio (tamanho × custo por cm)
-  * Pingentes e fechos
-  * Mão de obra
-* Definição de margem de lucro (%)
-* Cálculo automático do preço final
-* Opção de salvar a pulseira como modelo
+* Receita do mês
+* Lucro do mês
+* Total de pedidos
+* Pulseiras em estoque
+* Gráfico de faturamento/lucro por mês
+* Pulseiras mais vendidas
+* Materiais com estoque baixo
+* Pedidos pendentes
 
 ---
 
-### 🔄 Produção
+## 🛍️ Pulseiras
 
-* Registro de produção de pulseiras
-* Desconto automático dos materiais utilizados
-* Adição automática ao estoque de produtos
+Cadastro dos modelos de pulseiras.
 
----
+Cada modelo possui:
 
-### 💸 Vendas
+* Nome
+* Preço padrão
+* Custo médio
+* Lucro estimado
+* Tempo médio de produção
+* Quantidade em estoque
+* Quantidade vendida
+* Quantidade utilizada em brindes
+* Quantidade utilizada em sorteios
 
-* Registro de vendas com:
+Também permite:
 
-  * Data
-  * Produto
-  * Quantidade
-  * Valor
-* Atualização automática do estoque
-* Integração com o caixa
+* Editar pulseira
+* Produzir novas unidades
+* Visualizar histórico
 
----
+Durante a produção, o sistema:
 
-### 💰 Controle Financeiro (Caixa)
-
-* Separação entre dinheiro pessoal e da empresa
-* Registro de:
-
-  * Entradas (vendas)
-  * Saídas (compras de materiais)
-  * Retiradas (uso pessoal)
-* Cálculo automático do saldo
-
----
-
-## 🧠 Objetivo do Sistema
-
-Ajudar no controle financeiro e operacional do negócio, evitando:
-
-* Perda de materiais
-* Erros no cálculo de preço
-* Falta de controle de estoque
-* Mistura de dinheiro pessoal com o da empresa
+* recalcula automaticamente o custo utilizando os preços atuais dos materiais;
+* calcula automaticamente o custo da mão de obra;
+* atualiza o custo médio da pulseira;
+* aumenta o estoque;
+* registra os custos no financeiro.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🧮 Calculadora
+
+Ferramenta para criação de novos modelos.
+
+Calcula automaticamente:
+
+* Custo dos materiais
+* Mão de obra
+* Custo total
+* Margem de lucro
+* Preço sugerido
+
+O preço sugerido pode ser alterado manualmente antes de salvar.
+
+Após salvar, a pulseira passa a fazer parte do catálogo de modelos.
+
+---
+
+## 📦 Materiais
+
+Controle completo dos materiais utilizados.
+
+* Cadastro
+* Entrada
+* Saída
+* Pesquisa de materiais
+* Histórico de movimentações
+
+Os materiais são descontados automaticamente sempre que uma produção é registrada.
+
+---
+
+## 👥 Clientes
+
+Cadastro e gerenciamento dos clientes.
+
+---
+
+## 📋 Pedidos
+
+Controle completo dos pedidos.
+
+Cada pedido possui:
+
+* Cliente
+* Pulseira
+* Quantidade
+* Tipo do pedido
+* Preço unitário
+* Valor total
+* Valor pago
+* Valor a receber
+* Forma de pagamento
+* Data
+* Status
+* Observações
+
+### Tipos de pedido
+
+* Venda
+* Brinde
+* Prêmio de sorteio
+
+### Funcionamento
+
+**Venda**
+
+* Gera receita.
+* Atualiza o financeiro.
+* Atualiza as vendas da pulseira.
+
+**Brinde**
+
+* Consome estoque.
+* Não gera receita.
+* Registra o custo como despesa de brindes.
+
+**Prêmio de sorteio**
+
+* Consome estoque.
+* Não gera receita.
+* Registra o custo como despesa de sorteios.
+
+O sistema permite editar o preço da pulseira diretamente no pedido sem alterar o preço padrão cadastrado.
+
+Também impede a criação de pedidos quando não houver estoque suficiente.
+
+---
+
+## 📄 Recibos
+
+A geração de recibos está integrada aos pedidos.
+
+Quando um pedido estiver com status **Entregue**, é possível:
+
+* Visualizar o recibo
+* Imprimir o recibo
+
+O recibo utiliza automaticamente o nome da empresa:
+
+**Trama**
+
+---
+
+## 👩 Artesãs
+
+Cadastro das artesãs.
+
+Cada artesã possui:
+
+* Nome
+* Valor por minuto
+
+O sistema calcula automaticamente:
+
+* Quantidade produzida
+* Valor recebido
+* Última produção
+
+Não é necessário registrar horas manualmente.
+
+---
+
+## 💰 Financeiro
+
+Controle financeiro completo da empresa.
+
+* Receitas
+* Gastos com materiais
+* Mão de obra
+* Brindes
+* Sorteios
+* Lucro
+* Gráficos mensais
+* Produtos mais vendidos
+* Produtos mais lucrativos
+
+---
+
+## 💾 Backup
+
+Sistema completo de backup.
+
+Permite:
+
+* Exportar todos os dados
+* Importar backups anteriores
+
+O formato do backup permanece compatível com versões antigas do sistema, realizando migração automática quando necessário.
+
+---
+
+# 🧠 Objetivo
+
+Centralizar toda a gestão da empresa em um único sistema, permitindo controlar:
+
+* Produção
+* Estoque
+* Pedidos
+* Clientes
+* Financeiro
+* Custos
+* Lucro
+
+Tudo de forma simples e organizada.
+
+---
+
+# 🛠️ Tecnologias Utilizadas
 
 * HTML
 * CSS
 * JavaScript
-* LocalStorage (armazenamento local no navegador)
+* LocalStorage
 
 ---
 
-## ▶️ Como usar
+# ▶️ Fluxo de utilização
 
-1. Abra o arquivo `index.html` no navegador
-2. Cadastre seus materiais
-3. Use a calculadora para criar modelos de pulseiras
-4. Produza pulseiras (estoque será atualizado automaticamente)
-5. Registre vendas
-6. Acompanhe o caixa da empresa
+1. Cadastrar materiais
+2. Criar um modelo utilizando a Calculadora
+3. Produzir pulseiras
+4. Registrar pedidos
+5. Gerar recibos quando necessário
+6. Acompanhar o financeiro e os indicadores pelo Dashboard
 
 ---
 
-## 📱 Interface
+# 📱 Interface
 
 * Interface simples e intuitiva
-* Otimizada para uso no celular
-* Navegação por seções (estoque, vendas, caixa, etc.)
+* Layout responsivo
+* Navegação organizada por módulos
 
 ---
 
-## ⭐ Funcionalidades futuras (opcional)
+# 📌 Observações
 
-* Alertas de estoque baixo
-* Gráficos de vendas e lucro
-* Histórico detalhado de movimentações
-* Exportação de dados
-
----
-
-## 📌 Observações
-
-* Sistema desenvolvido para uso local (não requer internet)
-* Dados armazenados no navegador (LocalStorage)
-* Recomendado não limpar os dados do navegador para evitar perda de informações
+* Sistema desenvolvido para uso local.
+* Não requer conexão com a internet.
+* Os dados são armazenados no navegador utilizando LocalStorage.
+* Recomenda-se realizar backups periódicos para evitar perda de dados.
 
 ---
 
-## 💡 Autor
+# 💡 Autor
 
-Projeto criado para auxiliar na gestão de uma pequena empresa artesanal de pulseiras.
+Projeto desenvolvido para auxiliar a gestão da **Trama**, automatizando o controle de produção, estoque, pedidos e financeiro de uma empresa artesanal de pulseiras.

@@ -5,494 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ateliê — Gestão de Pulseiras</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-/* ===== RESET & VARIÁVEIS ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --cream: #FFFFFF;
-  --warm-white: #FFF8F9;
-  --blush: #FF7096;
-  --rose: #E8184E;
-  --rose-dark: #C01040;
-  --clay: #FF8FAA;
-  --sage: #D4234F;
-  --sage-dark: #A81840;
-  --ink: #1A0810;
-  --ink-light: #4A1528;
-  --muted: #A05070;
-  --border: #FFD6E0;
-  --card-bg: #FFFFFF;
-  --shadow: 0 2px 20px rgba(220,30,70,0.07);
-  --shadow-md: 0 8px 40px rgba(220,30,70,0.13);
-  --radius: 16px;
-  --radius-sm: 10px;
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-body: 'DM Sans', sans-serif;
-}
-
-body {
-  font-family: var(--font-body);
-  background: var(--cream);
-  color: var(--ink);
-  min-height: 100vh;
-  padding-bottom: 100px;
-}
-
-/* ===== HEADER ===== */
-.app-header {
-  background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
-  color: #FFFFFF;
-  padding: 20px 20px 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.app-header h1 {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-.app-header h1 em { color: var(--blush); font-style: italic; }
-.app-header p {
-  font-size: 11px;
-  color: var(--clay);
-  margin-top: 2px;
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-/* ===== ALERTAS DE ESTOQUE ===== */
-.alerts-bar {
-  background: #FFF3CD;
-  border-bottom: 1px solid #FFD66B;
-  padding: 8px 16px;
-  font-size: 12px;
-  color: #7A5C00;
-  display: none;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.alerts-bar.visible { display: flex; }
-.alert-tag {
-  background: #FFE082;
-  padding: 3px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-/* ===== NAVEGAÇÃO (TABS) ===== */
-.tab-nav {
-  background: #FFFFFF;
-  border-bottom: 2px solid #FFD6E0;
-  padding: 0 12px;
-  display: flex;
-  overflow-x: auto;
-  gap: 2px;
-  scrollbar-width: none;
-  position: sticky;
-  top: 72px;
-  z-index: 99;
-}
-.tab-nav::-webkit-scrollbar { display: none; }
-.tab-btn {
-  padding: 14px 12px;
-  border: none;
-  background: none;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  cursor: pointer;
-  white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: all 0.2s;
-  letter-spacing: 0.04em;
-}
-.tab-btn.active { color: var(--rose); border-bottom-color: var(--rose); }
-.tab-btn:hover:not(.active) { color: var(--ink-light); }
-
-/* ===== CONTEÚDO ===== */
-.tab-content { display: none; padding: 20px; max-width: 640px; margin: 0 auto; }
-.tab-content.active { display: block; }
-
-/* ===== DASHBOARD ===== */
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.dash-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  box-shadow: var(--shadow);
-}
-.dash-card .label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  font-weight: 500;
-  margin-bottom: 6px;
-}
-.dash-card .value {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1;
-}
-.dash-card .value.positive { color: var(--sage-dark); }
-.dash-card .value.negative { color: var(--rose-dark); }
-.dash-card .sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
-.dash-card-full {
-  grid-column: 1 / -1;
-  background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
-  color: white;
-  border: none;
-}
-.dash-card-full .label { color: #FFB3C4; }
-.dash-card-full .value { color: white; font-size: 28px; }
-.dash-card-full .sub { color: #FFB3C4; }
-
-/* ===== SEÇÕES ===== */
-.section-title {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 400;
-  color: var(--ink);
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  font-style: italic;
-}
-
-/* ===== FORMULÁRIOS ===== */
-.form-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow);
-}
-.form-card h3 {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 14px;
-  color: var(--ink-light);
-}
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.form-row.single { grid-template-columns: 1fr; }
-.form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin-bottom: 5px;
-}
-input, select, textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--ink);
-  background: var(--warm-white);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  appearance: none;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--rose);
-  box-shadow: 0 0 0 3px rgba(232,24,78,0.12);
-}
-select { cursor: pointer; }
-textarea { resize: vertical; min-height: 70px; }
-
-/* ===== BOTÕES ===== */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 11px 18px;
-  border-radius: var(--radius-sm);
-  border: none;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.03em;
-}
-.btn-primary {
-  background: var(--rose);
-  color: white;
-  width: 100%;
-  margin-top: 4px;
-  padding: 13px;
-  font-size: 14px;
-}
-.btn-primary:hover { background: var(--rose-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
-.btn-secondary {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--ink-light);
-  width: 100%;
-  margin-top: 4px;
-}
-.btn-secondary:hover { border-color: var(--rose); color: var(--rose); }
-.btn-sage {
-  background: var(--sage);
-  color: white;
-  width: 100%;
-  margin-top: 4px;
-  padding: 13px;
-  font-size: 14px;
-}
-.btn-sage:hover { background: var(--sage-dark); transform: translateY(-1px); }
-.btn-sm {
-  padding: 6px 12px;
-  font-size: 11px;
-  width: auto;
-  border-radius: 6px;
-}
-.btn-danger-sm {
-  background: transparent;
-  border: 1px solid #FFCDD2;
-  color: #C62828;
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.btn-danger-sm:hover { background: #FFCDD2; }
-.btn-edit-sm {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--ink-light);
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--font-body);
-  font-weight: 600;
-  transition: all 0.2s;
-}
-.btn-edit-sm:hover { border-color: var(--rose); color: var(--rose); }
-
-/* ===== LISTA DE ITENS ===== */
-.items-list { display: flex; flex-direction: column; gap: 10px; }
-.item-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  box-shadow: var(--shadow);
-  transition: box-shadow 0.2s;
-}
-.item-card:hover { box-shadow: var(--shadow-md); }
-.item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-.item-name { font-weight: 600; font-size: 14px; color: var(--ink); }
-.item-badge {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 20px;
-  letter-spacing: 0.04em;
-}
-.badge-ok { background: #E8F5E9; color: #2E7D32; }
-.badge-low { background: #FFF3CD; color: #7A5C00; }
-.badge-zero { background: #FFEBEE; color: #C62828; }
-.badge-pago { background: #E8F5E9; color: #2E7D32; }
-.badge-pendente { background: #FFF3CD; color: #7A5C00; }
-.badge-parcial { background: #E3F2FD; color: #1565C0; }
-.badge-atrasado { background: #FFEBEE; color: #C62828; }
-.item-details { display: flex; gap: 12px; flex-wrap: wrap; }
-.item-detail { font-size: 11px; color: var(--muted); }
-.item-detail strong { color: var(--ink-light); font-weight: 600; }
-.item-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-
-/* ===== CALCULADORA ===== */
-.calc-result {
-  background: linear-gradient(135deg, #C01040 0%, #E8184E 60%, #FF4070 100%);
-  border-radius: var(--radius);
-  padding: 20px;
-  color: white;
-  margin-bottom: 16px;
-  text-align: center;
-}
-.calc-result .result-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #FFB3C4; margin-bottom: 4px; }
-.calc-result .result-value { font-family: var(--font-display); font-size: 36px; font-weight: 700; color: white; line-height: 1; }
-.calc-result .result-sub { font-size: 12px; color: #FFB3C4; margin-top: 6px; }
-.calc-breakdown { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; margin-top: 12px; text-align: left; }
-.calc-breakdown-row { display: flex; justify-content: space-between; font-size: 12px; color: white; padding: 3px 0; opacity: 0.85; }
-.calc-breakdown-row.total { border-top: 1px solid rgba(255,255,255,0.3); margin-top: 4px; padding-top: 6px; font-weight: 600; opacity: 1; color: #FFB3C4; }
-.calc-mat-row {
-  display: grid;
-  grid-template-columns: 1fr 80px 80px auto;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.calc-mat-row .mat-cost { font-size: 12px; color: var(--sage-dark); font-weight: 600; padding-top: 14px; }
-
-/* ===== MODAL ===== */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(44,8,16,0.5);
-  z-index: 200;
-  padding: 20px;
-  overflow-y: auto;
-}
-.modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding-top: 40px; }
-.modal {
-  background: var(--warm-white);
-  border-radius: var(--radius);
-  padding: 22px;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: var(--shadow-md);
-}
-.modal h3 { font-family: var(--font-display); font-size: 18px; margin-bottom: 16px; color: var(--ink); font-style: italic; }
-.modal-actions { display: flex; gap: 10px; margin-top: 16px; }
-.modal-actions .btn { margin: 0; }
-
-/* ===== MOVIMENTAÇÕES ===== */
-.mov-list { display: flex; flex-direction: column; gap: 6px; }
-.mov-item {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-}
-.mov-info .mov-desc { font-weight: 500; color: var(--ink); }
-.mov-info .mov-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.mov-value { font-weight: 700; font-size: 15px; }
-.mov-value.entrada { color: var(--sage-dark); }
-.mov-value.saida { color: var(--rose-dark); }
-.mov-value.retirada { color: var(--clay); }
-
-/* ===== EMPTY STATE ===== */
-.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
-.empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.6; }
-.empty-state p { font-size: 13px; }
-
-/* ===== TOAST ===== */
-#toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--ink);
-  color: var(--cream);
-  padding: 12px 22px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.3s;
-  z-index: 999;
-  white-space: nowrap;
-  pointer-events: none;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast.success { background: var(--sage-dark); }
-#toast.error { background: var(--rose-dark); }
-
-/* ===== RECIBO ===== */
-.recibo-box {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  font-size: 13px;
-}
-.recibo-header { text-align: center; border-bottom: 2px solid var(--rose); padding-bottom: 14px; margin-bottom: 14px; }
-.recibo-header h2 { font-family: var(--font-display); font-size: 22px; color: var(--rose); font-style: italic; }
-.recibo-header p { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.recibo-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
-.recibo-row:last-child { border: none; }
-.recibo-row strong { color: var(--ink-light); }
-.recibo-total { background: var(--warm-white); border-radius: var(--radius-sm); padding: 12px; text-align: center; margin-top: 14px; }
-.recibo-total .val { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--rose); }
-.recibo-footer { text-align: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); font-size: 11px; color: var(--muted); }
-.recibo-assinatura { margin-top: 30px; display: flex; justify-content: center; }
-.recibo-assinatura .linha { width: 180px; border-top: 1px solid var(--ink); text-align: center; padding-top: 6px; font-size: 11px; color: var(--muted); }
-
-/* ===== FINANCEIRO ===== */
-.fin-section { margin-bottom: 20px; }
-.fin-section-title { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 10px; padding-left: 4px; border-left: 3px solid var(--rose); padding-left: 8px; }
-.fin-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; }
-.fin-row .fin-label { color: var(--ink-light); }
-.fin-row .fin-val { font-weight: 700; }
-.fin-row .fin-val.green { color: var(--sage-dark); }
-.fin-row .fin-val.red { color: var(--rose-dark); }
-.fin-total-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: linear-gradient(135deg, #C01040, #E8184E); border-radius: var(--radius); color: white; margin-top: 8px; }
-.fin-total-row .fin-label { font-weight: 600; }
-.fin-total-row .fin-val { font-family: var(--font-display); font-size: 22px; }
-
-/* ===== DIVIDER ===== */
-.divider { text-align: center; position: relative; margin: 16px 0; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
-.divider::before { left: 0; }
-.divider::after { right: 0; }
-
-hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-.text-muted { color: var(--muted); font-size: 12px; }
-.mt-8 { margin-top: 8px; }
-.mb-12 { margin-bottom: 12px; }
-.highlight-box { background: #E8F5E9; border: 1px solid #A5D6A7; border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: #2E7D32; margin-bottom: 12px; }
-
-/* ===== PRINT ===== */
-@media print {
-  body * { visibility: hidden; }
-  #print-area, #print-area * { visibility: visible; }
-  #print-area { position: fixed; top: 0; left: 0; width: 100%; padding: 20px; }
-  .no-print { display: none !important; }
-}
-
-@media (max-width: 380px) {
-  .form-row { grid-template-columns: 1fr; }
-  .form-row.triple { grid-template-columns: 1fr 1fr; }
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .dash-card-full { grid-column: auto; }
-  .calc-mat-row { grid-template-columns: 1fr 70px 70px auto; }
-}
-</style>
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -508,58 +21,131 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 <!-- NAVEGAÇÃO -->
 <nav class="tab-nav" id="tabNav">
   <button class="tab-btn active" onclick="showTab('dashboard')">📊 Painel</button>
-  <button class="tab-btn" onclick="showTab('clientes')">👥 Clientes</button>
-  <button class="tab-btn" onclick="showTab('materiais')">📦 Materiais</button>
+  <button class="tab-btn" onclick="showTab('pulseiras')">📿 Pulseiras</button>
   <button class="tab-btn" onclick="showTab('calculadora')">🧮 Calculadora</button>
-  <button class="tab-btn" onclick="showTab('maodeobra')">🧵 Mão de Obra</button>
-  <button class="tab-btn" onclick="showTab('vendas')">💸 Vendas</button>
-  <button class="tab-btn" onclick="showTab('receber')">📋 A Receber</button>
+  <button class="tab-btn" onclick="showTab('materiais')">📦 Materiais</button>
+  <button class="tab-btn" onclick="showTab('clientes')">👥 Clientes</button>
+  <button class="tab-btn" onclick="showTab('pedidos')">📋 Pedidos</button>
+  <button class="tab-btn" onclick="showTab('artesas')">🧵 Artesãs</button>
   <button class="tab-btn" onclick="showTab('financeiro')">💰 Financeiro</button>
-  <button class="tab-btn" onclick="showTab('recibos')">🧾 Recibos</button>
   <button class="tab-btn" onclick="showTab('backup')">💾 Backup</button>
 </nav>
 
 <!-- ==================== PAINEL ==================== -->
 <div class="tab-content active" id="tab-dashboard">
   <div class="dashboard-grid" id="dashGrid"></div>
-  <h2 class="section-title">Últimas movimentações</h2>
-  <div id="dashMovs"></div>
-</div>
 
-<!-- ==================== CLIENTES ==================== -->
-<div class="tab-content" id="tab-clientes">
-  <h2 class="section-title">Clientes</h2>
-  <div class="form-card">
-    <h3 id="clienteFormTitle">✦ Novo cliente</h3>
-    <input type="hidden" id="clienteEditId">
-    <div class="form-row">
-      <div><label>Nome *</label><input id="cNome" type="text" placeholder="Nome completo"></div>
-      <div><label>Telefone</label><input id="cTel" type="text" placeholder="(00) 00000-0000"></div>
-    </div>
-    <div class="form-row single">
-      <div><label>Instagram</label><input id="cInsta" type="text" placeholder="@usuario"></div>
-    </div>
-    <div class="form-row single">
-      <div><label>Observações</label><textarea id="cObs" placeholder="Preferências, histórico..."></textarea></div>
-    </div>
-    <button class="btn btn-primary" onclick="salvarCliente()">💾 Salvar cliente</button>
-    <button class="btn btn-secondary" onclick="cancelarEdicaoCliente()" id="btnCancelarCliente" style="display:none">Cancelar</button>
+  <div class="chart-card">
+    <h3>Evolução mensal — faturamento x lucro</h3>
+    <div id="dashChart"></div>
   </div>
-  <h2 class="section-title">Clientes cadastrados</h2>
-  <div id="clientesList"></div>
+
+  <h2 class="section-title">Pulseiras mais vendidas</h2>
+  <div id="dashMaisVendidas"></div>
+
+  <h2 class="section-title" style="margin-top:20px">Materiais com estoque baixo</h2>
+  <div id="dashEstoqueBaixo"></div>
+
+  <h2 class="section-title" style="margin-top:20px">Pedidos pendentes</h2>
+  <div id="dashPedidosPendentes"></div>
 </div>
 
-<!-- MODAL CLIENTE DETALHES -->
-<div class="modal-overlay" id="modalCliente">
+<!-- ==================== PULSEIRAS ==================== -->
+<div class="tab-content" id="tab-pulseiras">
+  <h2 class="section-title">Pulseiras</h2>
+  <div class="search-box"><input type="text" placeholder="Pesquisar pulseira..." oninput="filtrarPulseiras(this.value)"></div>
+  <p class="text-muted mb-12">Novos modelos são criados na aba <strong>Calculadora</strong>. Aqui você produz, edita a receita e acompanha o estoque.</p>
+  <div id="pulseirasList"></div>
+</div>
+
+<!-- MODAL PRODUZIR -->
+<div class="modal-overlay" id="modalProduzir">
   <div class="modal">
-    <h3 id="modalClienteNome"></h3>
-    <div id="modalClienteInfo"></div>
-    <h4 style="font-size:13px;color:var(--muted);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.07em">Histórico de compras</h4>
-    <div id="modalClienteHistorico"></div>
+    <h3 id="modalProduzirNome"></h3>
+    <input type="hidden" id="modalProduzirId">
+    <div class="form-row">
+      <div><label>Quantidade produzida *</label><input id="modalProduzirQtd" type="number" min="1" value="1"></div>
+      <div><label>Artesã responsável *</label><select id="modalProduzirArtesa"><option value="">— Selecione —</option></select></div>
+    </div>
+    <p class="text-muted" id="modalProduzirAviso"></p>
     <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="fecharModal('modalCliente')">Fechar</button>
+      <button class="btn btn-primary" onclick="confirmarProducao()">✔ Confirmar produção</button>
+      <button class="btn btn-secondary" onclick="fecharModal('modalProduzir')">Cancelar</button>
     </div>
   </div>
+</div>
+
+<!-- MODAL EDITAR PULSEIRA -->
+<div class="modal-overlay" id="modalEditar">
+  <div class="modal">
+    <h3>✦ Editar pulseira</h3>
+    <input type="hidden" id="modalEditarId">
+    <div class="form-row">
+      <div><label>Nome *</label><input id="modalEditarNome" type="text"></div>
+      <div><label>Tempo médio (min)</label><input id="modalEditarTempo" type="number" min="0" step="any"></div>
+    </div>
+    <div class="form-row single">
+      <div><label>Preço padrão (R$) *</label><input id="modalEditarPreco" type="number" min="0" step="0.01"></div>
+    </div>
+    <h4 style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 8px">Receita (materiais)</h4>
+    <div id="modalEditarMateriais"></div>
+    <button class="btn btn-secondary mt-8" onclick="addEditRow()">+ Adicionar material</button>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="salvarEdicaoPulseira()">💾 Salvar</button>
+      <button class="btn btn-secondary" onclick="fecharModal('modalEditar')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTÓRICO PULSEIRA -->
+<div class="modal-overlay" id="modalHistPulseira">
+  <div class="modal">
+    <h3 id="modalHistPulseiraNome"></h3>
+    <div id="modalHistPulseiraLista"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="fecharModal('modalHistPulseira')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- ==================== CALCULADORA ==================== -->
+<div class="tab-content" id="tab-calculadora">
+  <h2 class="section-title">Calculadora — criar nova pulseira</h2>
+  <div class="form-card">
+    <h3>✦ Dados do produto</h3>
+    <div class="form-row single">
+      <div><label>Nome do produto *</label><input id="calcNome" type="text" placeholder="Ex: Pulseira boho rosa"></div>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Materiais utilizados</h3>
+    <div id="calcMateriais"></div>
+    <button class="btn btn-secondary mt-8" onclick="addCalcMaterial()">+ Adicionar material</button>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Mão de obra</h3>
+    <div class="form-row">
+      <div><label>Artesã</label><select id="calcArtesa"><option value="">— Selecione —</option></select></div>
+      <div><label>Minutos</label><input id="calcMinutos" type="number" min="0" step="1" placeholder="45" oninput="recalcular()"></div>
+    </div>
+    <div id="calcMaoObraInfo" class="text-muted mt-8"></div>
+  </div>
+
+  <div class="form-card">
+    <h3>✦ Margem de lucro e preço</h3>
+    <div class="form-row">
+      <div><label>Margem (%)</label><input id="calcMargem" type="number" min="0" max="1000" value="100" oninput="recalcular()"></div>
+      <div><label>Preço de venda (editável)</label><input id="calcPrecoSugerido" type="text" oninput="editarPrecoSugerido(this.value.replace(',','.')); recalcular()" style="background:#f8f0f3;color:var(--sage-dark);font-weight:600"></div>
+    </div>
+  </div>
+
+  <div class="calc-result" id="calcResultado">
+    <div class="result-label">Custo total calculado</div>
+    <div class="result-value" id="calcCustoTotal">R$ 0,00</div>
+    <div class="calc-breakdown" id="calcBreakdown"></div>
+  </div>
+
+  <button class="btn btn-sage" onclick="salvarCalculadora()">💾 Criar pulseira</button>
 </div>
 
 <!-- ==================== MATERIAIS ==================== -->
@@ -575,26 +161,20 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
     <div class="form-row triple">
       <div>
         <label>Unidade *</label>
-        <select id="mUnidade">
-          <option value="uni">uni</option>
-          <option value="cm">cm</option>
-          <option value="g">g</option>
-        </select>
+        <select id="mUnidade"><option value="uni">uni</option><option value="cm">cm</option><option value="g">g</option></select>
       </div>
       <div><label>Qtd comprada *</label><input id="mQtdComprada" type="number" min="0" step="any" placeholder="10000"></div>
       <div><label>Valor pago (R$) *</label><input id="mValorPago" type="number" min="0" step="0.01" placeholder="18.00" oninput="calcCustoUnitario()"></div>
     </div>
     <div class="form-row">
-      <div>
-        <label>Custo unitário (auto)</label>
-        <input id="mCustoUni" type="text" readonly placeholder="Calculado auto" style="background:#f8f0f3;color:var(--sage-dark);font-weight:600">
-      </div>
+      <div><label>Custo unitário (auto)</label><input id="mCustoUni" type="text" readonly placeholder="Calculado auto" style="background:#f8f0f3;color:var(--sage-dark);font-weight:600"></div>
       <div><label>Estoque mínimo</label><input id="mEstoqueMin" type="number" min="0" step="any" placeholder="500"></div>
     </div>
     <button class="btn btn-primary" onclick="salvarMaterial()">💾 Salvar material</button>
     <button class="btn btn-secondary" onclick="cancelarEdicaoMaterial()" id="btnCancelarMaterial" style="display:none">Cancelar</button>
   </div>
   <h2 class="section-title">Estoque atual</h2>
+  <div class="search-box"><input type="text" placeholder="Pesquisar material..." oninput="filtrarMateriais(this.value)"></div>
   <div id="materiaisList"></div>
 </div>
 
@@ -602,8 +182,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 <div class="modal-overlay" id="modalMovimento">
   <div class="modal">
     <h3 id="modalMovTitulo"></h3>
-    <input type="hidden" id="modalMovId">
-    <input type="hidden" id="modalMovTipo">
+    <input type="hidden" id="modalMovId"><input type="hidden" id="modalMovTipo">
     <div class="form-row">
       <div><label>Quantidade *</label><input id="modalMovQtd" type="number" min="0.01" step="any" placeholder="0"></div>
       <div><label>Motivo</label><input id="modalMovMotivo" type="text" placeholder="Ex: compra, ajuste..."></div>
@@ -620,63 +199,94 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
   <div class="modal">
     <h3 id="modalHistMatNome"></h3>
     <div id="modalHistMatLista"></div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="fecharModal('modalHistMat')">Fechar</button>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="fecharModal('modalHistMat')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- ==================== CLIENTES ==================== -->
+<div class="tab-content" id="tab-clientes">
+  <h2 class="section-title">Clientes</h2>
+  <div class="form-card">
+    <h3 id="clienteFormTitle">✦ Novo cliente</h3>
+    <input type="hidden" id="clienteEditId">
+    <div class="form-row">
+      <div><label>Nome *</label><input id="cNome" type="text" placeholder="Nome completo"></div>
+      <div><label>Telefone</label><input id="cTel" type="text" placeholder="(00) 00000-0000"></div>
+    </div>
+    <div class="form-row single"><div><label>Instagram</label><input id="cInsta" type="text" placeholder="@usuario"></div></div>
+    <div class="form-row single"><div><label>Observações</label><textarea id="cObs" placeholder="Preferências, histórico..."></textarea></div></div>
+    <button class="btn btn-primary" onclick="salvarCliente()">💾 Salvar cliente</button>
+    <button class="btn btn-secondary" onclick="cancelarEdicaoCliente()" id="btnCancelarCliente" style="display:none">Cancelar</button>
+  </div>
+  <h2 class="section-title">Clientes cadastrados</h2>
+  <div id="clientesList"></div>
+</div>
+
+<!-- MODAL CLIENTE DETALHES -->
+<div class="modal-overlay" id="modalCliente">
+  <div class="modal">
+    <h3 id="modalClienteNome"></h3>
+    <div id="modalClienteInfo"></div>
+    <h4 style="font-size:13px;color:var(--muted);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.07em">Histórico de compras</h4>
+    <div id="modalClienteHistorico"></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="fecharModal('modalCliente')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- ==================== PEDIDOS ==================== -->
+<div class="tab-content" id="tab-pedidos">
+  <h2 class="section-title">Registrar pedido</h2>
+  <div class="form-card">
+    <div class="form-row">
+      <div><label>Cliente</label><select id="pCliente"><option value="">— Selecione —</option><option value="__novo__">+ Novo cliente</option></select></div>
+      <div><label>Pulseira *</label><select id="pPulseira" onchange="onPulseiraPedidoChange()"><option value="">— Selecione —</option></select></div>
+    </div>
+    <div class="text-muted mb-12" id="pEstoqueInfo"></div>
+    <div class="form-row triple">
+      <div><label>Qtd *</label><input id="pQtd" type="number" min="1" value="1" oninput="calcTotalPedido()"></div>
+      <div><label>Preço unitário *</label><input id="pPrecoUnit" type="number" min="0" step="0.01" oninput="calcTotalPedido()"></div>
+      <div><label>Total</label><input id="pTotal" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--sage-dark)"></div>
+    </div>
+    <div class="form-row">
+      <div><label>Data *</label><input id="pData" type="date"></div>
+      <div><label>Forma de pagamento</label><select id="pFormaPagamento">
+        <option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
+      </select></div>
+    </div>
+    <div class="form-row">
+      <div><label>Valor pago (R$)</label><input id="pValorPago" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcTotalPedido()"></div>
+      <div><label>Valor restante</label><input id="pValorRestante" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--rose-dark)"></div>
+    </div>
+    <div class="form-row single">
+      <div><label>Observações</label><input id="pObs" type="text" placeholder="Detalhes do pedido... (aparece no recibo)"></div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarPedido()">💾 Registrar pedido</button>
+  </div>
+  <h2 class="section-title">Histórico de pedidos</h2>
+  <div id="pedidosList"></div>
+</div>
+
+<!-- MODAL RECIBO (gerado a partir de um pedido Entregue) -->
+<div class="modal-overlay" id="modalRecibo">
+  <div class="modal" style="max-width:520px">
+    <h3>✦ Recibo</h3>
+    <input type="hidden" id="reciboPedidoId">
+    <div class="form-row single no-print">
+      <div><label>Nome do ateliê / empresa</label><input id="reciboEmpresaInput" type="text" placeholder="Seu nome ou marca" oninput="previewRecibo()"></div>
+    </div>
+    <div id="print-area">
+      <div class="recibo-box" id="reciboPreview"></div>
+    </div>
+    <div class="modal-actions no-print">
+      <button class="btn btn-sage" onclick="gerarRecibo()">🖨️ Imprimir recibo</button>
+      <button class="btn btn-secondary" onclick="fecharModal('modalRecibo')">Fechar</button>
     </div>
   </div>
 </div>
 
-<!-- ==================== CALCULADORA ==================== -->
-<div class="tab-content" id="tab-calculadora">
-  <h2 class="section-title">Calculadora de custo</h2>
-  <div class="form-card">
-    <h3>✦ Dados do produto</h3>
-    <div class="form-row">
-      <div><label>Nome do produto</label><input id="calcNome" type="text" placeholder="Ex: Pulseira boho rosa"></div>
-      <div><label>Salvar como produto?</label>
-        <select id="calcSalvar"><option value="sim">Sim</option><option value="nao">Não</option></select>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-card">
-    <h3>✦ Materiais utilizados</h3>
-    <div id="calcMateriais"></div>
-    <button class="btn btn-secondary mt-8" onclick="addCalcMaterial()">+ Adicionar material</button>
-  </div>
-
-  <div class="form-card">
-    <h3>✦ Mão de obra</h3>
-    <div class="form-row">
-      <div>
-        <label>Artesã</label>
-        <select id="calcArtesa"><option value="">— Selecione —</option></select>
-      </div>
-      <div><label>Minutos</label><input id="calcMinutos" type="number" min="0" step="1" placeholder="45" oninput="recalcular()"></div>
-    </div>
-    <div id="calcMaoObraInfo" class="text-muted mt-8"></div>
-  </div>
-
-  <div class="form-card">
-    <h3>✦ Margem de lucro</h3>
-    <div class="form-row">
-      <div><label>Margem (%)</label><input id="calcMargem" type="number" min="0" max="1000" value="100" oninput="recalcular()"></div>
-      <div><label>Preço sugerido</label><input id="calcPrecoSugerido" type="text" readonly style="background:#f8f0f3;color:var(--sage-dark);font-weight:600"></div>
-    </div>
-  </div>
-
-  <div class="calc-result" id="calcResultado">
-    <div class="result-label">Custo total calculado</div>
-    <div class="result-value" id="calcCustoTotal">R$ 0,00</div>
-    <div class="calc-breakdown" id="calcBreakdown"></div>
-  </div>
-
-  <button class="btn btn-sage" onclick="salvarCalculadora()">💾 Salvar produto</button>
-</div>
-
-<!-- ==================== MÃO DE OBRA ==================== -->
-<div class="tab-content" id="tab-maodeobra">
-  <h2 class="section-title">Mão de obra</h2>
+<!-- ==================== ARTESÃS ==================== -->
+<div class="tab-content" id="tab-artesas">
+  <h2 class="section-title">Artesãs</h2>
   <div class="form-card">
     <h3 id="artesaFormTitle">✦ Cadastrar artesã</h3>
     <input type="hidden" id="artesaEditId">
@@ -688,86 +298,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
     <button class="btn btn-primary" onclick="salvarArtesa()">💾 Salvar</button>
     <button class="btn btn-secondary" onclick="cancelarEdicaoArtesa()" id="btnCancelarArtesa" style="display:none">Cancelar</button>
   </div>
-
   <h2 class="section-title">Equipe</h2>
+  <p class="text-muted mb-12">Produção, valor recebido e última produção são calculados automaticamente a partir da aba Pulseiras.</p>
   <div id="artesasList"></div>
-
-  <h2 class="section-title" style="margin-top:20px">Registrar hora trabalhada</h2>
-  <div class="form-card">
-    <div class="form-row">
-      <div>
-        <label>Artesã</label>
-        <select id="horaArtesa"><option value="">— Selecione —</option></select>
-      </div>
-      <div><label>Minutos</label><input id="horaMinutos" type="number" min="1" placeholder="45"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Descrição</label><input id="horaDesc" type="text" placeholder="Pulseira boho..."></div>
-      <div><label>Data</label><input id="horaData" type="date"></div>
-    </div>
-    <button class="btn btn-sage" onclick="registrarHora()">✔ Registrar</button>
-  </div>
-
-  <h2 class="section-title">Relatório de mão de obra</h2>
-  <div id="relatorioMaoObra"></div>
-</div>
-
-<!-- ==================== VENDAS ==================== -->
-<div class="tab-content" id="tab-vendas">
-  <h2 class="section-title">Registrar venda</h2>
-  <div class="form-card">
-    <input type="hidden" id="vendaEditId">
-    <div class="form-row">
-      <div>
-        <label>Cliente</label>
-        <select id="vCliente"><option value="">— Selecione —</option><option value="__novo__">+ Novo cliente</option></select>
-      </div>
-      <div><label>Produto *</label><input id="vProduto" type="text" placeholder="Pulseira boho rosa"></div>
-    </div>
-    <div class="form-row triple">
-      <div><label>Qtd *</label><input id="vQtd" type="number" min="1" value="1" oninput="calcTotalVenda()"></div>
-      <div><label>Vlr unitário *</label><input id="vValorUnit" type="number" min="0" step="0.01" placeholder="35.00" oninput="calcTotalVenda()"></div>
-      <div><label>Total</label><input id="vTotal" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--sage-dark)"></div>
-    </div>
-    <div class="form-row">
-      <div><label>Data *</label><input id="vData" type="date"></div>
-      <div>
-        <label>Status</label>
-        <select id="vStatus">
-          <option value="pago">Pago</option>
-          <option value="pendente">Pendente</option>
-          <option value="parcial">Parcial</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row single">
-      <div><label>Obs / Descrição</label><input id="vObs" type="text" placeholder="Detalhes do pedido..."></div>
-    </div>
-    <button class="btn btn-primary" onclick="salvarVenda()">💾 Registrar venda</button>
-  </div>
-  <h2 class="section-title">Histórico de vendas</h2>
-  <div id="vendasList"></div>
-</div>
-
-<!-- ==================== A RECEBER ==================== -->
-<div class="tab-content" id="tab-receber">
-  <h2 class="section-title">Contas a receber</h2>
-  <div id="receberList"></div>
-</div>
-
-<!-- MODAL PAGAMENTO PARCIAL -->
-<div class="modal-overlay" id="modalPagamento">
-  <div class="modal">
-    <h3>Registrar pagamento</h3>
-    <input type="hidden" id="modalPagId">
-    <div class="form-row single">
-      <div><label>Valor recebido (R$)</label><input id="modalPagValor" type="number" min="0" step="0.01" placeholder="0.00"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" onclick="confirmarPagamento()">Confirmar</button>
-      <button class="btn btn-secondary" onclick="fecharModal('modalPagamento')">Cancelar</button>
-    </div>
-  </div>
 </div>
 
 <!-- ==================== FINANCEIRO ==================== -->
@@ -778,12 +311,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
       <div>
         <label>Mês</label>
         <select id="finMes">
-          <option value="0">Janeiro</option><option value="1">Fevereiro</option>
-          <option value="2">Março</option><option value="3">Abril</option>
-          <option value="4">Maio</option><option value="5">Junho</option>
-          <option value="6">Julho</option><option value="7">Agosto</option>
-          <option value="8">Setembro</option><option value="9">Outubro</option>
-          <option value="10">Novembro</option><option value="11">Dezembro</option>
+          <option value="0">Janeiro</option><option value="1">Fevereiro</option><option value="2">Março</option><option value="3">Abril</option>
+          <option value="4">Maio</option><option value="5">Junho</option><option value="6">Julho</option><option value="7">Agosto</option>
+          <option value="8">Setembro</option><option value="9">Outubro</option><option value="10">Novembro</option><option value="11">Dezembro</option>
         </select>
       </div>
       <div><label>Ano</label><input id="finAno" type="number" min="2020" max="2099" value="2025"></div>
@@ -799,31 +329,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
       <div><label>Descrição *</label><input id="despDesc" type="text" placeholder="Embalagem, frete..."></div>
       <div><label>Valor (R$) *</label><input id="despValor" type="number" min="0" step="0.01" placeholder="0.00"></div>
     </div>
-    <div class="form-row single">
-      <div><label>Data</label><input id="despData" type="date"></div>
-    </div>
+    <div class="form-row single"><div><label>Data</label><input id="despData" type="date"></div></div>
     <button class="btn btn-primary" onclick="salvarDespesa()">💾 Salvar despesa</button>
-  </div>
-</div>
-
-<!-- ==================== RECIBOS ==================== -->
-<div class="tab-content" id="tab-recibos">
-  <h2 class="section-title">Gerar recibo</h2>
-  <div class="form-card">
-    <div class="form-row single">
-      <div>
-        <label>Selecione uma venda</label>
-        <select id="reciboVenda" onchange="previewRecibo()"><option value="">— Selecione —</option></select>
-      </div>
-    </div>
-    <div class="form-row single">
-      <div><label>Nome do ateliê / empresa</label><input id="reciboEmpresa" type="text" value="Ateliê Pulseiras" placeholder="Seu nome ou marca"></div>
-    </div>
-    <button class="btn btn-sage mt-8" onclick="gerarRecibo()">🖨️ Imprimir recibo</button>
-  </div>
-
-  <div id="print-area">
-    <div class="recibo-box" id="reciboPreview" style="display:none"></div>
   </div>
 </div>
 
@@ -837,7 +344,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
   </div>
   <div class="form-card">
     <h3>✦ Importar backup</h3>
-    <p class="text-muted mb-12">Restaura um backup anterior. Atenção: substitui todos os dados atuais.</p>
+    <p class="text-muted mb-12">Restaura um backup anterior (inclusive de versões antigas do sistema). Atenção: substitui todos os dados atuais.</p>
     <input type="file" id="backupFile" accept=".json" style="margin-bottom:10px">
     <button class="btn btn-sage" onclick="importarBackup()">⬆ Restaurar backup</button>
   </div>
@@ -851,1032 +358,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 <!-- TOAST -->
 <div id="toast"></div>
 
-<script>
-// =====================================================
-// DADOS — localStorage
-// =====================================================
-const DB = {
-  get(key) { try { return JSON.parse(localStorage.getItem('atelie_' + key)) || []; } catch { return []; } },
-  set(key, val) { localStorage.setItem('atelie_' + key, JSON.stringify(val)); },
-  getObj(key, def={}) { try { return JSON.parse(localStorage.getItem('atelie_' + key)) || def; } catch { return def; } },
-  setObj(key, val) { localStorage.setItem('atelie_' + key, JSON.stringify(val)); }
-};
-
-// Chaves: clientes, materiais, movimentos, artesas, horas, vendas, despesas, produtos
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-
-// =====================================================
-// UTILITÁRIOS
-// =====================================================
-function fmt(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}); }
-function fmtN(v) { return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtDate(d) { if(!d)return '—'; const [a,m,dia]=d.split('-'); return `${dia}/${m}/${a}`; }
-function today() { return new Date().toISOString().slice(0,10); }
-function mesAno(d) { if(!d)return ''; const p=d.split('-'); return p[0]+'-'+p[1]; }
-
-function toast(msg, tipo='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'show ' + tipo;
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.className = '', 2500);
-}
-
-function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
-function abrirModal(id) { document.getElementById(id).classList.add('open'); }
-
-// =====================================================
-// TABS
-// =====================================================
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  const btns = document.querySelectorAll('.tab-btn');
-  btns.forEach(b => { if(b.getAttribute('onclick').includes("'"+id+"'")) b.classList.add('active'); });
-  // Render quando abre aba
-  if(id==='dashboard') renderDashboard();
-  if(id==='clientes') renderClientes();
-  if(id==='materiais') renderMateriais();
-  if(id==='calculadora') renderCalculadora();
-  if(id==='maodeobra') renderMaoObra();
-  if(id==='vendas') renderVendas();
-  if(id==='receber') renderReceber();
-  if(id==='financeiro') { initFinanceiro(); gerarFinanceiro(); }
-  if(id==='recibos') renderRecibos();
-  checkAlertas();
-}
-
-// =====================================================
-// ALERTAS DE ESTOQUE
-// =====================================================
-function checkAlertas() {
-  const materiais = DB.get('materiais');
-  const baixos = materiais.filter(m => m.estoqueAtual <= m.estoqueMin && m.estoqueMin > 0);
-  const bar = document.getElementById('alertsBar');
-  if(baixos.length === 0) { bar.classList.remove('visible'); return; }
-  bar.innerHTML = '<strong>⚠ Estoque baixo:</strong> ' + baixos.map(m =>
-    `<span class="alert-tag">${m.nome} (${m.estoqueAtual} ${m.unidade})</span>`
-  ).join('');
-  bar.classList.add('visible');
-}
-
-// =====================================================
-// DASHBOARD
-// =====================================================
-function renderDashboard() {
-  const vendas = DB.get('vendas');
-  const materiais = DB.get('materiais');
-  const clientes = DB.get('clientes');
-  const despesas = DB.get('despesas');
-  const horas = DB.get('horas');
-  const artesas = DB.get('artesas');
-
-  const now = new Date();
-  const mesAtual = now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
-
-  const vendasMes = vendas.filter(v => mesAno(v.data) === mesAtual);
-  const fatMes = vendasMes.reduce((s,v) => s + v.total, 0);
-  const receberTotal = vendas.filter(v => v.status !== 'pago').reduce((s,v) => s + (v.totalPendente || v.total), 0);
-
-  // Custo materiais: movimentos de compra no mês
-  const movimentos = DB.get('movimentos');
-  const custoMatMes = movimentos
-    .filter(m => m.tipo === 'compra' && mesAno(m.data) === mesAtual)
-    .reduce((s,m) => s + (m.valor||0), 0);
-
-  // Custo mão de obra no mês
-  const custoMoMes = horas.filter(h => mesAno(h.data) === mesAtual).reduce((s,h) => {
-    const a = artesas.find(x => x.id === h.artesaId);
-    return s + (a ? a.valorMin * h.minutos : 0);
-  }, 0);
-
-  const despMes = despesas.filter(d => mesAno(d.data) === mesAtual).reduce((s,d) => s + d.valor, 0);
-  const lucroMes = fatMes - custoMatMes - custoMoMes - despMes;
-
-  const baixoEstoque = materiais.filter(m => m.estoqueAtual <= m.estoqueMin && m.estoqueMin > 0).length;
-
-  document.getElementById('dashGrid').innerHTML = `
-    <div class="dash-card dash-card-full">
-      <div class="label">Faturamento do mês</div>
-      <div class="value">R$ ${fmtN(fatMes)}</div>
-      <div class="sub">${vendasMes.length} pedido(s) em ${now.toLocaleString('pt-BR',{month:'long'})}</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">Lucro estimado</div>
-      <div class="value ${lucroMes >= 0 ? 'positive':'negative'}">R$ ${fmtN(lucroMes)}</div>
-      <div class="sub">após custos</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">A receber</div>
-      <div class="value negative">R$ ${fmtN(receberTotal)}</div>
-      <div class="sub">pendente / parcial</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">Custo materiais</div>
-      <div class="value">R$ ${fmtN(custoMatMes)}</div>
-      <div class="sub">compras no mês</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">Custo mão de obra</div>
-      <div class="value">R$ ${fmtN(custoMoMes)}</div>
-      <div class="sub">horas no mês</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">Clientes</div>
-      <div class="value">${clientes.length}</div>
-      <div class="sub">cadastrados</div>
-    </div>
-    <div class="dash-card">
-      <div class="label">Alerta estoque</div>
-      <div class="value ${baixoEstoque>0?'negative':'positive'}">${baixoEstoque}</div>
-      <div class="sub">material(is) baixo(s)</div>
-    </div>
-  `;
-
-  // Últimas vendas
-  const ultimas = [...vendas].sort((a,b) => b.data > a.data ? 1 : -1).slice(0,5);
-  if(ultimas.length === 0) {
-    document.getElementById('dashMovs').innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Nenhuma venda registrada ainda.</p></div>`;
-    return;
-  }
-  document.getElementById('dashMovs').innerHTML = `<div class="mov-list">${ultimas.map(v => `
-    <div class="mov-item">
-      <div class="mov-info">
-        <div class="mov-desc">${v.produto} ${v.cliente ? '— '+v.cliente : ''}</div>
-        <div class="mov-date">${fmtDate(v.data)} · ${v.status}</div>
-      </div>
-      <div class="mov-value entrada">R$ ${fmtN(v.total)}</div>
-    </div>`).join('')}</div>`;
-}
-
-// =====================================================
-// CLIENTES
-// =====================================================
-function salvarCliente() {
-  const id = document.getElementById('clienteEditId').value;
-  const nome = document.getElementById('cNome').value.trim();
-  if(!nome) { toast('Nome obrigatório', 'error'); return; }
-  const clientes = DB.get('clientes');
-  const obj = { id: id || uid(), nome, tel: document.getElementById('cTel').value, insta: document.getElementById('cInsta').value, obs: document.getElementById('cObs').value };
-  if(id) {
-    const i = clientes.findIndex(c => c.id === id);
-    if(i>=0) clientes[i] = obj;
-  } else {
-    clientes.push(obj);
-  }
-  DB.set('clientes', clientes);
-  cancelarEdicaoCliente();
-  renderClientes();
-  atualizarSelectClientes();
-  toast('Cliente salvo!', 'success');
-}
-
-function cancelarEdicaoCliente() {
-  document.getElementById('clienteEditId').value = '';
-  document.getElementById('cNome').value = '';
-  document.getElementById('cTel').value = '';
-  document.getElementById('cInsta').value = '';
-  document.getElementById('cObs').value = '';
-  document.getElementById('clienteFormTitle').textContent = '✦ Novo cliente';
-  document.getElementById('btnCancelarCliente').style.display = 'none';
-}
-
-function editarCliente(id) {
-  const c = DB.get('clientes').find(x => x.id === id);
-  if(!c) return;
-  document.getElementById('clienteEditId').value = c.id;
-  document.getElementById('cNome').value = c.nome;
-  document.getElementById('cTel').value = c.tel||'';
-  document.getElementById('cInsta').value = c.insta||'';
-  document.getElementById('cObs').value = c.obs||'';
-  document.getElementById('clienteFormTitle').textContent = '✦ Editar cliente';
-  document.getElementById('btnCancelarCliente').style.display = '';
-  document.getElementById('cNome').scrollIntoView({behavior:'smooth'});
-}
-
-function excluirCliente(id) {
-  if(!confirm('Excluir este cliente?')) return;
-  DB.set('clientes', DB.get('clientes').filter(c => c.id !== id));
-  renderClientes();
-  atualizarSelectClientes();
-  toast('Cliente excluído');
-}
-
-function verCliente(id) {
-  const c = DB.get('clientes').find(x => x.id === id);
-  if(!c) return;
-  const vendas = DB.get('vendas').filter(v => v.clienteId === id);
-  const total = vendas.reduce((s,v) => s+v.total, 0);
-  document.getElementById('modalClienteNome').textContent = c.nome;
-  document.getElementById('modalClienteInfo').innerHTML = `
-    <div class="item-details" style="flex-direction:column;gap:6px">
-      ${c.tel ? `<div class="item-detail">📞 <strong>${c.tel}</strong></div>` : ''}
-      ${c.insta ? `<div class="item-detail">📸 <strong>${c.insta}</strong></div>` : ''}
-      ${c.obs ? `<div class="item-detail">💬 ${c.obs}</div>` : ''}
-      <div class="item-detail">🛍 <strong>${vendas.length}</strong> pedido(s) · Total: <strong>R$ ${fmtN(total)}</strong></div>
-    </div>`;
-  document.getElementById('modalClienteHistorico').innerHTML = vendas.length === 0
-    ? '<p class="text-muted">Nenhuma compra.</p>'
-    : vendas.map(v => `<div class="mov-item"><div class="mov-info"><div class="mov-desc">${v.produto}</div><div class="mov-date">${fmtDate(v.data)} · ${v.status}</div></div><div class="mov-value entrada">R$ ${fmtN(v.total)}</div></div>`).join('');
-  abrirModal('modalCliente');
-}
-
-function renderClientes() {
-  const clientes = DB.get('clientes');
-  const vendas = DB.get('vendas');
-  if(clientes.length === 0) {
-    document.getElementById('clientesList').innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><p>Nenhum cliente cadastrado.</p></div>`;
-    return;
-  }
-  document.getElementById('clientesList').innerHTML = `<div class="items-list">${clientes.map(c => {
-    const cv = vendas.filter(v => v.clienteId === c.id);
-    const total = cv.reduce((s,v) => s+v.total, 0);
-    return `<div class="item-card">
-      <div class="item-header">
-        <div class="item-name">${c.nome}</div>
-        <span class="item-badge badge-ok">${cv.length} pedido(s)</span>
-      </div>
-      <div class="item-details">
-        ${c.tel ? `<div class="item-detail">📞 ${c.tel}</div>` : ''}
-        ${c.insta ? `<div class="item-detail">📸 ${c.insta}</div>` : ''}
-        <div class="item-detail">💰 <strong>R$ ${fmtN(total)}</strong> total</div>
-      </div>
-      <div class="item-actions">
-        <button class="btn-edit-sm" onclick="verCliente('${c.id}')">👁 Ver</button>
-        <button class="btn-edit-sm" onclick="editarCliente('${c.id}')">✏ Editar</button>
-        <button class="btn-danger-sm" onclick="excluirCliente('${c.id}')">🗑 Excluir</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-function atualizarSelectClientes() {
-  const clientes = DB.get('clientes');
-  const s = document.getElementById('vCliente');
-  if(!s) return;
-  const val = s.value;
-  s.innerHTML = '<option value="">— Sem cliente —</option><option value="__novo__">+ Novo cliente</option>' +
-    clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
-  s.value = val;
-}
-
-// =====================================================
-// MATERIAIS
-// =====================================================
-function calcCustoUnitario() {
-  const qtd = parseFloat(document.getElementById('mQtdComprada').value) || 0;
-  const val = parseFloat(document.getElementById('mValorPago').value) || 0;
-  document.getElementById('mCustoUni').value = (qtd > 0 && val > 0) ? (val/qtd).toFixed(6) : '';
-}
-
-function salvarMaterial() {
-  const id = document.getElementById('materialEditId').value;
-  const nome = document.getElementById('mNome').value.trim();
-  const qtdC = parseFloat(document.getElementById('mQtdComprada').value) || 0;
-  const valP = parseFloat(document.getElementById('mValorPago').value) || 0;
-  if(!nome || qtdC <= 0 || valP <= 0) { toast('Preencha nome, quantidade e valor', 'error'); return; }
-
-  const materiais = DB.get('materiais');
-  const custoUni = valP / qtdC;
-
-  if(id) {
-    const i = materiais.findIndex(m => m.id === id);
-    if(i >= 0) {
-      const antigo = materiais[i];
-      materiais[i] = {
-        ...antigo,
-        nome,
-        categ: document.getElementById('mCateg').value,
-        unidade: document.getElementById('mUnidade').value,
-        custoUni,
-        estoqueMin: parseFloat(document.getElementById('mEstoqueMin').value) || 0
-      };
-    }
-  } else {
-    const obj = {
-      id: uid(),
-      nome,
-      categ: document.getElementById('mCateg').value,
-      unidade: document.getElementById('mUnidade').value,
-      qtdComprada: qtdC,
-      valorPago: valP,
-      custoUni,
-      estoqueAtual: qtdC,
-      estoqueMin: parseFloat(document.getElementById('mEstoqueMin').value) || 0
-    };
-    materiais.push(obj);
-    // registrar movimentação de entrada
-    registrarMovimento(obj.id, 'compra', qtdC, 'Cadastro inicial', valP);
-  }
-  DB.set('materiais', materiais);
-  cancelarEdicaoMaterial();
-  renderMateriais();
-  checkAlertas();
-  toast('Material salvo!', 'success');
-}
-
-function registrarMovimento(materialId, tipo, qtd, motivo, valor=0) {
-  const movs = DB.get('movimentos');
-  movs.push({ id: uid(), materialId, tipo, qtd, motivo, valor, data: today() });
-  DB.set('movimentos', movs);
-}
-
-function cancelarEdicaoMaterial() {
-  document.getElementById('materialEditId').value = '';
-  document.getElementById('mNome').value = '';
-  document.getElementById('mCateg').value = '';
-  document.getElementById('mUnidade').value = 'uni';
-  document.getElementById('mQtdComprada').value = '';
-  document.getElementById('mValorPago').value = '';
-  document.getElementById('mCustoUni').value = '';
-  document.getElementById('mEstoqueMin').value = '';
-  document.getElementById('materialFormTitle').textContent = '✦ Cadastrar material';
-  document.getElementById('btnCancelarMaterial').style.display = 'none';
-}
-
-function editarMaterial(id) {
-  const m = DB.get('materiais').find(x => x.id === id);
-  if(!m) return;
-  document.getElementById('materialEditId').value = m.id;
-  document.getElementById('mNome').value = m.nome;
-  document.getElementById('mCateg').value = m.categ||'';
-  document.getElementById('mUnidade').value = m.unidade;
-  document.getElementById('mQtdComprada').value = m.qtdComprada||'';
-  document.getElementById('mValorPago').value = m.valorPago||'';
-  document.getElementById('mCustoUni').value = m.custoUni ? m.custoUni.toFixed(6) : '';
-  document.getElementById('mEstoqueMin').value = m.estoqueMin||'';
-  document.getElementById('materialFormTitle').textContent = '✦ Editar material';
-  document.getElementById('btnCancelarMaterial').style.display = '';
-  document.getElementById('mNome').scrollIntoView({behavior:'smooth'});
-}
-
-function excluirMaterial(id) {
-  if(!confirm('Excluir este material?')) return;
-  DB.set('materiais', DB.get('materiais').filter(m => m.id !== id));
-  renderMateriais();
-  checkAlertas();
-  toast('Material excluído');
-}
-
-function abrirMovimento(id, tipo) {
-  document.getElementById('modalMovId').value = id;
-  document.getElementById('modalMovTipo').value = tipo;
-  document.getElementById('modalMovQtd').value = '';
-  document.getElementById('modalMovMotivo').value = '';
-  document.getElementById('modalMovTitulo').textContent = tipo === 'entrada' ? '✦ Entrada de estoque' : '✦ Saída de estoque';
-  abrirModal('modalMovimento');
-}
-
-function confirmarMovimento() {
-  const id = document.getElementById('modalMovId').value;
-  const tipo = document.getElementById('modalMovTipo').value;
-  const qtd = parseFloat(document.getElementById('modalMovQtd').value) || 0;
-  const motivo = document.getElementById('modalMovMotivo').value;
-  if(qtd <= 0) { toast('Informe quantidade', 'error'); return; }
-
-  const materiais = DB.get('materiais');
-  const i = materiais.findIndex(m => m.id === id);
-  if(i < 0) return;
-
-  if(tipo === 'entrada') {
-    materiais[i].estoqueAtual += qtd;
-    registrarMovimento(id, 'entrada', qtd, motivo || 'Entrada manual');
-  } else {
-    if(materiais[i].estoqueAtual < qtd) { toast('Estoque insuficiente', 'error'); return; }
-    materiais[i].estoqueAtual -= qtd;
-    registrarMovimento(id, 'saida', qtd, motivo || 'Saída manual');
-  }
-  DB.set('materiais', materiais);
-  fecharModal('modalMovimento');
-  renderMateriais();
-  checkAlertas();
-  toast('Movimentação registrada!', 'success');
-}
-
-function verHistoricoMaterial(id) {
-  const m = DB.get('materiais').find(x => x.id === id);
-  const movs = DB.get('movimentos').filter(x => x.materialId === id).reverse();
-  document.getElementById('modalHistMatNome').textContent = m ? m.nome : 'Material';
-  document.getElementById('modalHistMatLista').innerHTML = movs.length === 0
-    ? '<p class="text-muted">Sem movimentações.</p>'
-    : `<div class="mov-list">${movs.map(mv => `
-      <div class="mov-item">
-        <div class="mov-info">
-          <div class="mov-desc">${mv.motivo || mv.tipo}</div>
-          <div class="mov-date">${fmtDate(mv.data)}</div>
-        </div>
-        <div class="mov-value ${mv.tipo==='saida'?'saida':'entrada'}">${mv.tipo==='saida'?'-':'+'} ${mv.qtd} ${m?.unidade||''}</div>
-      </div>`).join('')}</div>`;
-  abrirModal('modalHistMat');
-}
-
-function renderMateriais() {
-  const materiais = DB.get('materiais');
-  if(materiais.length === 0) {
-    document.getElementById('materiaisList').innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><p>Nenhum material cadastrado.</p></div>`;
-    return;
-  }
-  document.getElementById('materiaisList').innerHTML = `<div class="items-list">${materiais.map(m => {
-    const status = m.estoqueAtual === 0 ? 'zero' : m.estoqueAtual <= m.estoqueMin && m.estoqueMin > 0 ? 'low' : 'ok';
-    const badgeLabel = status === 'zero' ? 'Zerado' : status === 'low' ? 'Baixo' : 'OK';
-    return `<div class="item-card">
-      <div class="item-header">
-        <div>
-          <div class="item-name">${m.nome}</div>
-          ${m.categ ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${m.categ}</div>` : ''}
-        </div>
-        <span class="item-badge badge-${status}">${badgeLabel}</span>
-      </div>
-      <div class="item-details">
-        <div class="item-detail">📊 Estoque: <strong>${m.estoqueAtual} ${m.unidade}</strong></div>
-        <div class="item-detail">⚠ Mínimo: <strong>${m.estoqueMin} ${m.unidade}</strong></div>
-        <div class="item-detail">💰 Custo/un: <strong>${fmt(m.custoUni)}</strong></div>
-      </div>
-      <div class="item-actions">
-        <button class="btn-edit-sm" onclick="abrirMovimento('${m.id}','entrada')">+ Entrada</button>
-        <button class="btn-edit-sm" onclick="abrirMovimento('${m.id}','saida')">- Saída</button>
-        <button class="btn-edit-sm" onclick="verHistoricoMaterial('${m.id}')">📋 Hist.</button>
-        <button class="btn-edit-sm" onclick="editarMaterial('${m.id}')">✏ Editar</button>
-        <button class="btn-danger-sm" onclick="excluirMaterial('${m.id}')">🗑</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-// =====================================================
-// CALCULADORA
-// =====================================================
-let calcRows = [];
-
-function renderCalculadora() {
-  // popular select artesã
-  const artesas = DB.get('artesas');
-  const sel = document.getElementById('calcArtesa');
-  sel.innerHTML = '<option value="">— Selecione —</option>' +
-    artesas.map(a => `<option value="${a.id}">${a.nome} (R$${Number(a.valorMin).toFixed(2)}/min)</option>`).join('');
-  sel.onchange = recalcular;
-  if(calcRows.length === 0) addCalcMaterial();
-  renderCalcMateriais();
-}
-
-function addCalcMaterial() {
-  calcRows.push({ id: uid(), matId: '', qtd: 0 });
-  renderCalcMateriais();
-}
-
-function renderCalcMateriais() {
-  const materiais = DB.get('materiais');
-  const opts = materiais.map(m => `<option value="${m.id}">${m.nome} (${m.unidade})</option>`).join('');
-  document.getElementById('calcMateriais').innerHTML = calcRows.map((row, idx) => `
-    <div class="calc-mat-row" id="calcrow-${row.id}">
-      <div>
-        <label>Material</label>
-        <select onchange="updateCalcRow('${row.id}','matId',this.value)">
-          <option value="">— Selecione —</option>${opts}
-        </select>
-      </div>
-      <div>
-        <label>Quantidade</label>
-        <input type="number" min="0" step="any" placeholder="0" value="${row.qtd||''}" oninput="updateCalcRow('${row.id}','qtd',this.value)">
-      </div>
-      <div class="mat-cost" id="calcCost-${row.id}">—</div>
-      <div style="padding-top:14px">
-        <button class="btn-danger-sm" onclick="removeCalcRow('${row.id}')">✕</button>
-      </div>
-    </div>`).join('');
-  // restaurar valores de select
-  calcRows.forEach(row => {
-    const sel = document.querySelector(`#calcrow-${row.id} select`);
-    if(sel && row.matId) sel.value = row.matId;
-  });
-  recalcular();
-}
-
-function updateCalcRow(id, field, val) {
-  const row = calcRows.find(r => r.id === id);
-  if(!row) return;
-  if(field === 'qtd') row.qtd = parseFloat(val) || 0;
-  else row[field] = val;
-  recalcular();
-}
-
-function removeCalcRow(id) {
-  calcRows = calcRows.filter(r => r.id !== id);
-  renderCalcMateriais();
-}
-
-function recalcular() {
-  const materiais = DB.get('materiais');
-  const artesas = DB.get('artesas');
-  let totalMat = 0;
-  const breakdown = [];
-
-  calcRows.forEach(row => {
-    const m = materiais.find(x => x.id === row.matId);
-    if(m && row.qtd > 0) {
-      const custo = m.custoUni * row.qtd;
-      totalMat += custo;
-      breakdown.push({ nome: `${m.nome} (${row.qtd} ${m.unidade})`, val: custo });
-      const el = document.getElementById('calcCost-'+row.id);
-      if(el) el.textContent = fmt(custo);
-    } else {
-      const el = document.getElementById('calcCost-'+row.id);
-      if(el) el.textContent = '—';
-    }
-  });
-
-  // Mão de obra
-  const artesaId = document.getElementById('calcArtesa').value;
-  const minutos = parseFloat(document.getElementById('calcMinutos').value) || 0;
-  let custoMO = 0;
-  if(artesaId && minutos > 0) {
-    const a = artesas.find(x => x.id === artesaId);
-    if(a) {
-      custoMO = a.valorMin * minutos;
-      document.getElementById('calcMaoObraInfo').textContent = `${a.nome} · ${minutos} min · ${fmt(custoMO)}`;
-      breakdown.push({ nome: `Mão de obra (${a.nome}, ${minutos} min)`, val: custoMO });
-    }
-  } else {
-    document.getElementById('calcMaoObraInfo').textContent = '';
-  }
-
-  const total = totalMat + custoMO;
-  const margem = parseFloat(document.getElementById('calcMargem').value) || 0;
-  const sugerido = total * (1 + margem/100);
-  const lucroEst = sugerido - total;
-
-  document.getElementById('calcCustoTotal').textContent = fmt(total);
-  document.getElementById('calcPrecoSugerido').value = fmtN(sugerido);
-
-  document.getElementById('calcBreakdown').innerHTML = [
-    ...breakdown.map(b => `<div class="calc-breakdown-row"><span>${b.nome}</span><span>${fmt(b.val)}</span></div>`),
-    `<div class="calc-breakdown-row total"><span>Custo total</span><span>${fmt(total)}</span></div>`,
-    `<div class="calc-breakdown-row total"><span>Preço sugerido (${margem}%)</span><span>R$ ${fmtN(sugerido)}</span></div>`,
-    `<div class="calc-breakdown-row total"><span>Lucro estimado</span><span>R$ ${fmtN(lucroEst)}</span></div>`,
-  ].join('');
-}
-
-function salvarCalculadora() {
-  const nome = document.getElementById('calcNome').value.trim();
-  if(!nome) { toast('Informe o nome do produto', 'error'); return; }
-  const salvar = document.getElementById('calcSalvar').value;
-  if(salvar !== 'sim') { toast('Cálculo não salvo (configurado para não salvar)', ''); return; }
-
-  const materiais = DB.get('materiais');
-  const artesas = DB.get('artesas');
-  const artesaId = document.getElementById('calcArtesa').value;
-  const minutos = parseFloat(document.getElementById('calcMinutos').value) || 0;
-  const margem = parseFloat(document.getElementById('calcMargem').value) || 100;
-  let totalMat = 0;
-  const itens = [];
-
-  calcRows.forEach(row => {
-    const m = materiais.find(x => x.id === row.matId);
-    if(m && row.qtd > 0) {
-      const custo = m.custoUni * row.qtd;
-      totalMat += custo;
-      itens.push({ materialId: m.id, nome: m.nome, qtd: row.qtd, unidade: m.unidade, custo });
-    }
-  });
-
-  let custoMO = 0;
-  if(artesaId && minutos > 0) {
-    const a = artesas.find(x => x.id === artesaId);
-    if(a) custoMO = a.valorMin * minutos;
-  }
-
-  const total = totalMat + custoMO;
-  const sugerido = total * (1 + margem/100);
-
-  const produtos = DB.get('produtos');
-  produtos.push({ id: uid(), nome, itens, artesaId, minutos, custoMO, custoMat: totalMat, custoTotal: total, margem, sugerido, data: today() });
-  DB.set('produtos', produtos);
-  toast('Produto salvo!', 'success');
-}
-
-// =====================================================
-// MÃO DE OBRA
-// =====================================================
-function salvarArtesa() {
-  const id = document.getElementById('artesaEditId').value;
-  const nome = document.getElementById('aNome').value.trim();
-  const valorMin = parseFloat(document.getElementById('aValorMin').value) || 0;
-  if(!nome || valorMin <= 0) { toast('Preencha nome e valor por minuto', 'error'); return; }
-  const artesas = DB.get('artesas');
-  const obj = { id: id||uid(), nome, funcao: document.getElementById('aFuncao').value, valorMin };
-  if(id) {
-    const i = artesas.findIndex(a => a.id === id);
-    if(i>=0) artesas[i] = obj;
-  } else artesas.push(obj);
-  DB.set('artesas', artesas);
-  cancelarEdicaoArtesa();
-  renderMaoObra();
-  atualizarSelectArtesas();
-  toast('Artesã salva!', 'success');
-}
-
-function cancelarEdicaoArtesa() {
-  document.getElementById('artesaEditId').value = '';
-  document.getElementById('aNome').value = '';
-  document.getElementById('aFuncao').value = '';
-  document.getElementById('aValorMin').value = '';
-  document.getElementById('artesaFormTitle').textContent = '✦ Cadastrar artesã';
-  document.getElementById('btnCancelarArtesa').style.display = 'none';
-}
-
-function editarArtesa(id) {
-  const a = DB.get('artesas').find(x => x.id === id);
-  if(!a) return;
-  document.getElementById('artesaEditId').value = a.id;
-  document.getElementById('aNome').value = a.nome;
-  document.getElementById('aFuncao').value = a.funcao||'';
-  document.getElementById('aValorMin').value = a.valorMin;
-  document.getElementById('artesaFormTitle').textContent = '✦ Editar artesã';
-  document.getElementById('btnCancelarArtesa').style.display = '';
-}
-
-function excluirArtesa(id) {
-  if(!confirm('Excluir esta artesã?')) return;
-  DB.set('artesas', DB.get('artesas').filter(a => a.id !== id));
-  renderMaoObra();
-  atualizarSelectArtesas();
-  toast('Artesã excluída');
-}
-
-function atualizarSelectArtesas() {
-  const artesas = DB.get('artesas');
-  ['horaArtesa','calcArtesa'].forEach(sid => {
-    const s = document.getElementById(sid);
-    if(!s) return;
-    const val = s.value;
-    s.innerHTML = '<option value="">— Selecione —</option>' +
-      artesas.map(a => `<option value="${a.id}">${a.nome}${a.funcao?' ('+a.funcao+')':''}</option>`).join('');
-    s.value = val;
-  });
-}
-
-function registrarHora() {
-  const artesaId = document.getElementById('horaArtesa').value;
-  const minutos = parseInt(document.getElementById('horaMinutos').value) || 0;
-  const desc = document.getElementById('horaDesc').value.trim();
-  const data = document.getElementById('horaData').value || today();
-  if(!artesaId || minutos <= 0) { toast('Selecione artesã e minutos', 'error'); return; }
-  const horas = DB.get('horas');
-  horas.push({ id: uid(), artesaId, minutos, desc, data });
-  DB.set('horas', horas);
-  document.getElementById('horaMinutos').value = '';
-  document.getElementById('horaDesc').value = '';
-  renderRelatorioMaoObra();
-  toast('Hora registrada!', 'success');
-}
-
-function renderRelatorioMaoObra() {
-  const artesas = DB.get('artesas');
-  const horas = DB.get('horas');
-  if(artesas.length === 0) { document.getElementById('relatorioMaoObra').innerHTML = '<div class="empty-state"><div class="empty-icon">🧵</div><p>Nenhuma artesã cadastrada.</p></div>'; return; }
-  document.getElementById('relatorioMaoObra').innerHTML = `<div class="items-list">${artesas.map(a => {
-    const hA = horas.filter(h => h.artesaId === a.id);
-    const totalMin = hA.reduce((s,h) => s+h.minutos, 0);
-    const totalVal = totalMin * a.valorMin;
-    return `<div class="item-card">
-      <div class="item-header">
-        <div class="item-name">${a.nome}</div>
-        <span class="item-badge badge-ok">${fmt(totalVal)}</span>
-      </div>
-      <div class="item-details">
-        <div class="item-detail">⏱ <strong>${totalMin} min</strong> totais</div>
-        <div class="item-detail">💰 R$${Number(a.valorMin).toFixed(2)}/min</div>
-        <div class="item-detail">📋 ${hA.length} registro(s)</div>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-function renderMaoObra() {
-  const artesas = DB.get('artesas');
-  if(artesas.length === 0) {
-    document.getElementById('artesasList').innerHTML = `<div class="empty-state"><div class="empty-icon">🧵</div><p>Nenhuma artesã cadastrada.</p></div>`;
-  } else {
-    document.getElementById('artesasList').innerHTML = `<div class="items-list">${artesas.map(a => `
-      <div class="item-card">
-        <div class="item-header">
-          <div class="item-name">${a.nome}</div>
-          ${a.funcao ? `<span class="item-badge badge-ok">${a.funcao}</span>` : ''}
-        </div>
-        <div class="item-details">
-          <div class="item-detail">💰 <strong>R$ ${Number(a.valorMin).toFixed(2)}/min</strong></div>
-        </div>
-        <div class="item-actions">
-          <button class="btn-edit-sm" onclick="editarArtesa('${a.id}')">✏ Editar</button>
-          <button class="btn-danger-sm" onclick="excluirArtesa('${a.id}')">🗑 Excluir</button>
-        </div>
-      </div>`).join('')}</div>`;
-  }
-  atualizarSelectArtesas();
-  document.getElementById('horaData').value = today();
-  renderRelatorioMaoObra();
-}
-
-// =====================================================
-// VENDAS
-// =====================================================
-function calcTotalVenda() {
-  const qtd = parseFloat(document.getElementById('vQtd').value) || 0;
-  const unit = parseFloat(document.getElementById('vValorUnit').value) || 0;
-  document.getElementById('vTotal').value = 'R$ ' + fmtN(qtd * unit);
-}
-
-function salvarVenda() {
-  const produto = document.getElementById('vProduto').value.trim();
-  const qtd = parseFloat(document.getElementById('vQtd').value) || 0;
-  const valorUnit = parseFloat(document.getElementById('vValorUnit').value) || 0;
-  const data = document.getElementById('vData').value || today();
-  if(!produto || qtd <= 0 || valorUnit <= 0) { toast('Preencha produto, qtd e valor', 'error'); return; }
-
-  let clienteId = document.getElementById('vCliente').value;
-  let clienteNome = '';
-  if(clienteId === '__novo__') {
-    toast('Cadastre o cliente primeiro na aba Clientes', 'error'); return;
-  }
-  if(clienteId) {
-    const c = DB.get('clientes').find(x => x.id === clienteId);
-    clienteNome = c ? c.nome : '';
-  }
-
-  const total = qtd * valorUnit;
-  const status = document.getElementById('vStatus').value;
-  const vendas = DB.get('vendas');
-  vendas.push({
-    id: uid(), clienteId, cliente: clienteNome, produto, qtd, valorUnit, total,
-    data, status, obs: document.getElementById('vObs').value, totalPendente: status === 'pago' ? 0 : total
-  });
-  DB.set('vendas', vendas);
-
-  document.getElementById('vProduto').value = '';
-  document.getElementById('vQtd').value = 1;
-  document.getElementById('vValorUnit').value = '';
-  document.getElementById('vTotal').value = '';
-  document.getElementById('vObs').value = '';
-  renderVendas();
-  renderRecibos();
-  checkAlertas();
-  toast('Venda registrada!', 'success');
-}
-
-function excluirVenda(id) {
-  if(!confirm('Excluir esta venda?')) return;
-  DB.set('vendas', DB.get('vendas').filter(v => v.id !== id));
-  renderVendas();
-  renderRecibos();
-  toast('Venda excluída');
-}
-
-function marcarPago(id) {
-  const vendas = DB.get('vendas');
-  const i = vendas.findIndex(v => v.id === id);
-  if(i>=0) { vendas[i].status = 'pago'; vendas[i].totalPendente = 0; }
-  DB.set('vendas', vendas);
-  renderVendas();
-  renderReceber();
-  toast('Venda marcada como paga!', 'success');
-}
-
-function renderVendas() {
-  const vendas = DB.get('vendas').sort((a,b) => b.data > a.data ? 1 : -1);
-  atualizarSelectClientes();
-  document.getElementById('vData').value = today();
-  if(vendas.length === 0) {
-    document.getElementById('vendasList').innerHTML = `<div class="empty-state"><div class="empty-icon">💸</div><p>Nenhuma venda registrada.</p></div>`;
-    return;
-  }
-  document.getElementById('vendasList').innerHTML = `<div class="items-list">${vendas.map(v => `
-    <div class="item-card">
-      <div class="item-header">
-        <div>
-          <div class="item-name">${v.produto}</div>
-          ${v.cliente ? `<div style="font-size:11px;color:var(--muted)">${v.cliente}</div>` : ''}
-        </div>
-        <span class="item-badge badge-${v.status}">${v.status}</span>
-      </div>
-      <div class="item-details">
-        <div class="item-detail">📅 ${fmtDate(v.data)}</div>
-        <div class="item-detail">📦 Qtd: <strong>${v.qtd}</strong></div>
-        <div class="item-detail">💰 Total: <strong>R$ ${fmtN(v.total)}</strong></div>
-      </div>
-      <div class="item-actions">
-        ${v.status !== 'pago' ? `<button class="btn-edit-sm" onclick="marcarPago('${v.id}')">✔ Pago</button>` : ''}
-        <button class="btn-danger-sm" onclick="excluirVenda('${v.id}')">🗑 Excluir</button>
-      </div>
-    </div>`).join('')}</div>`;
-}
-
-// =====================================================
-// CONTAS A RECEBER
-// =====================================================
-function renderReceber() {
-  const vendas = DB.get('vendas').filter(v => v.status !== 'pago');
-  if(vendas.length === 0) {
-    document.getElementById('receberList').innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><p>Nenhuma pendência! Tudo pago.</p></div>`;
-    return;
-  }
-  const hoje = today();
-  document.getElementById('receberList').innerHTML = `<div class="items-list">${vendas.map(v => {
-    const atrasado = v.vencimento && v.vencimento < hoje && v.status !== 'pago';
-    return `<div class="item-card" style="${atrasado?'border-color:#FFCDD2;background:#FFF8F8':''}">
-      <div class="item-header">
-        <div>
-          <div class="item-name">${v.produto}</div>
-          ${v.cliente ? `<div style="font-size:11px;color:var(--muted)">${v.cliente}</div>` : ''}
-        </div>
-        <span class="item-badge badge-${atrasado?'atrasado':v.status}">${atrasado?'Atrasado':v.status}</span>
-      </div>
-      <div class="item-details">
-        <div class="item-detail">📅 Venda: ${fmtDate(v.data)}</div>
-        <div class="item-detail">💰 Pendente: <strong>R$ ${fmtN(v.totalPendente||v.total)}</strong></div>
-      </div>
-      <div class="item-actions">
-        <button class="btn-edit-sm" onclick="marcarPago('${v.id}')">✔ Marcar pago</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-// =====================================================
-// FINANCEIRO
-// =====================================================
-function initFinanceiro() {
-  const now = new Date();
-  document.getElementById('finMes').value = now.getMonth();
-  document.getElementById('finAno').value = now.getFullYear();
-  document.getElementById('despData').value = today();
-}
-
-function gerarFinanceiro() {
-  const mes = parseInt(document.getElementById('finMes').value);
-  const ano = parseInt(document.getElementById('finAno').value);
-  const prefixo = ano + '-' + String(mes+1).padStart(2,'0');
-
-  const vendas = DB.get('vendas').filter(v => mesAno(v.data) === prefixo && v.status === 'pago');
-  const totalVendas = vendas.reduce((s,v) => s+v.total, 0);
-
-  const movimentos = DB.get('movimentos').filter(m => m.tipo === 'compra' && mesAno(m.data) === prefixo);
-  const custoMat = movimentos.reduce((s,m) => s+(m.valor||0), 0);
-
-  const artesas = DB.get('artesas');
-  const horas = DB.get('horas').filter(h => mesAno(h.data) === prefixo);
-  const custoMO = horas.reduce((s,h) => {
-    const a = artesas.find(x => x.id === h.artesaId);
-    return s + (a ? a.valorMin * h.minutos : 0);
-  }, 0);
-
-  const despesas = DB.get('despesas').filter(d => mesAno(d.data) === prefixo);
-  const totalDesp = despesas.reduce((s,d) => s+d.valor, 0);
-
-  const totalSaidas = custoMat + custoMO + totalDesp;
-  const lucro = totalVendas - totalSaidas;
-
-  document.getElementById('finConteudo').innerHTML = `
-    <div class="fin-section">
-      <div class="fin-section-title">Entradas</div>
-      <div class="fin-row"><span class="fin-label">Vendas recebidas</span><span class="fin-val green">R$ ${fmtN(totalVendas)}</span></div>
-    </div>
-    <div class="fin-section">
-      <div class="fin-section-title">Saídas</div>
-      <div class="fin-row"><span class="fin-label">Compra de materiais</span><span class="fin-val red">R$ ${fmtN(custoMat)}</span></div>
-      <div class="fin-row"><span class="fin-label">Pagamento mão de obra</span><span class="fin-val red">R$ ${fmtN(custoMO)}</span></div>
-      <div class="fin-row"><span class="fin-label">Outras despesas</span><span class="fin-val red">R$ ${fmtN(totalDesp)}</span></div>
-      ${despesas.map(d => `<div class="fin-row" style="padding-left:20px;background:#fafafa"><span class="fin-label" style="font-size:12px;color:var(--muted)">↳ ${d.desc}</span><span class="fin-val" style="font-size:12px;color:var(--muted)">R$ ${fmtN(d.valor)}</span></div>`).join('')}
-    </div>
-    <div class="fin-total-row">
-      <span class="fin-label">Lucro líquido do mês</span>
-      <span class="fin-val">R$ ${fmtN(lucro)}</span>
-    </div>
-  `;
-}
-
-function salvarDespesa() {
-  const desc = document.getElementById('despDesc').value.trim();
-  const valor = parseFloat(document.getElementById('despValor').value) || 0;
-  const data = document.getElementById('despData').value || today();
-  if(!desc || valor <= 0) { toast('Preencha descrição e valor', 'error'); return; }
-  const despesas = DB.get('despesas');
-  despesas.push({ id: uid(), desc, valor, data });
-  DB.set('despesas', despesas);
-  document.getElementById('despDesc').value = '';
-  document.getElementById('despValor').value = '';
-  gerarFinanceiro();
-  toast('Despesa salva!', 'success');
-}
-
-// =====================================================
-// RECIBOS
-// =====================================================
-function renderRecibos() {
-  const vendas = DB.get('vendas');
-  const sel = document.getElementById('reciboVenda');
-  sel.innerHTML = '<option value="">— Selecione uma venda —</option>' +
-    vendas.map(v => `<option value="${v.id}">${fmtDate(v.data)} · ${v.produto}${v.cliente?' ('+v.cliente+')':''} · R$ ${fmtN(v.total)}</option>`).join('');
-}
-
-function previewRecibo() {
-  const id = document.getElementById('reciboVenda').value;
-  if(!id) { document.getElementById('reciboPreview').style.display = 'none'; return; }
-  const v = DB.get('vendas').find(x => x.id === id);
-  if(!v) return;
-  const empresa = document.getElementById('reciboEmpresa').value || 'Ateliê Pulseiras';
-  document.getElementById('reciboPreview').style.display = '';
-  document.getElementById('reciboPreview').innerHTML = gerarHTMLRecibo(v, empresa);
-}
-
-function gerarHTMLRecibo(v, empresa) {
-  return `
-    <div class="recibo-header">
-      <h2>${empresa}</h2>
-      <p>Recibo de pagamento</p>
-    </div>
-    <div class="recibo-row"><span>Cliente</span><strong>${v.cliente || 'Não informado'}</strong></div>
-    <div class="recibo-row"><span>Produto / Pedido</span><strong>${v.produto}</strong></div>
-    <div class="recibo-row"><span>Quantidade</span><strong>${v.qtd}</strong></div>
-    <div class="recibo-row"><span>Valor unitário</span><strong>R$ ${fmtN(v.valorUnit)}</strong></div>
-    <div class="recibo-row"><span>Data</span><strong>${fmtDate(v.data)}</strong></div>
-    <div class="recibo-row"><span>Status</span><strong>${v.status.toUpperCase()}</strong></div>
-    ${v.obs ? `<div class="recibo-row"><span>Obs.</span><strong>${v.obs}</strong></div>` : ''}
-    <div class="recibo-total">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">VALOR TOTAL</div>
-      <div class="val">R$ ${fmtN(v.total)}</div>
-    </div>
-    <div class="recibo-assinatura">
-      <div class="linha">${empresa}<br>Assinatura</div>
-    </div>
-    <div class="recibo-footer">
-      Gerado em ${new Date().toLocaleDateString('pt-BR')} · ${empresa}
-    </div>
-  `;
-}
-
-function gerarRecibo() {
-  const id = document.getElementById('reciboVenda').value;
-  if(!id) { toast('Selecione uma venda', 'error'); return; }
-  previewRecibo();
-  setTimeout(() => window.print(), 300);
-}
-
-// =====================================================
-// BACKUP
-// =====================================================
-function exportarBackup() {
-  const chaves = ['clientes','materiais','movimentos','artesas','horas','vendas','despesas','produtos'];
-  const dados = {};
-  chaves.forEach(k => { dados[k] = DB.get(k); });
-  dados._exportado = new Date().toISOString();
-  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'atelie-backup-' + today() + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Backup exportado!', 'success');
-}
-
-function importarBackup() {
-  const file = document.getElementById('backupFile').files[0];
-  if(!file) { toast('Selecione um arquivo .json', 'error'); return; }
-  if(!confirm('Isso substituirá TODOS os dados atuais. Continuar?')) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const dados = JSON.parse(e.target.result);
-      const chaves = ['clientes','materiais','movimentos','artesas','horas','vendas','despesas','produtos'];
-      chaves.forEach(k => { if(dados[k]) DB.set(k, dados[k]); });
-      toast('Backup restaurado!', 'success');
-      showTab('dashboard');
-    } catch { toast('Arquivo inválido!', 'error'); }
-  };
-  reader.readAsText(file);
-}
-
-function limparDados() {
-  if(!confirm('ATENÇÃO: isso apaga todos os dados permanentemente. Tem certeza?')) return;
-  if(!confirm('Segunda confirmação: apagar tudo mesmo?')) return;
-  const chaves = ['clientes','materiais','movimentos','artesas','horas','vendas','despesas','produtos'];
-  chaves.forEach(k => localStorage.removeItem('atelie_'+k));
-  toast('Dados apagados', '');
-  showTab('dashboard');
-}
-
-// =====================================================
-// INIT
-// =====================================================
-document.addEventListener('DOMContentLoaded', () => {
-  renderDashboard();
-  checkAlertas();
-  // Fechar modal ao clicar fora
-  document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', e => { if(e.target === el) el.classList.remove('open'); });
-  });
-});
-</script>
+<!-- ==================== SCRIPTS ==================== -->
+<script src="js/utils.js"></script>
+<script src="js/db.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/clientes.js"></script>
+<script src="js/materiais.js"></script>
+<script src="js/pulseiras.js"></script>
+<script src="js/calculadora.js"></script>
+<script src="js/pedidos.js"></script>
+<script src="js/recibos.js"></script>
+<script src="js/artesas.js"></script>
+<script src="js/financeiro.js"></script>
+<script src="js/backup.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

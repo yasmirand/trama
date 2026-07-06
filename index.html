@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ateliê — Gestão de Pulseiras</title>
+<title>Trama — Gestão de Pulseiras</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -11,7 +11,7 @@
 
 <!-- HEADER -->
 <header class="app-header">
-  <h1>✦ Ateliê <em>Pulseiras</em></h1>
+  <h1>✦ <em>Trama</em></h1>
   <p>Gestão completa do seu negócio</p>
 </header>
 
@@ -235,8 +235,16 @@
 
 <!-- ==================== PEDIDOS ==================== -->
 <div class="tab-content" id="tab-pedidos">
+  <h2 class="section-title">Resumo</h2>
+  <div class="dashboard-grid" id="pedidosResumo"></div>
+
   <h2 class="section-title">Registrar pedido</h2>
   <div class="form-card">
+    <div class="form-row single">
+      <div><label>Tipo do pedido *</label><select id="pTipo" onchange="onTipoPedidoChange()">
+        <option value="venda">Venda</option><option value="brinde">Brinde</option><option value="sorteio">Prêmio de sorteio</option>
+      </select></div>
+    </div>
     <div class="form-row">
       <div><label>Cliente</label><select id="pCliente"><option value="">— Selecione —</option><option value="__novo__">+ Novo cliente</option></select></div>
       <div><label>Pulseira *</label><select id="pPulseira" onchange="onPulseiraPedidoChange()"><option value="">— Selecione —</option></select></div>
@@ -244,25 +252,34 @@
     <div class="text-muted mb-12" id="pEstoqueInfo"></div>
     <div class="form-row triple">
       <div><label>Qtd *</label><input id="pQtd" type="number" min="1" value="1" oninput="calcTotalPedido()"></div>
-      <div><label>Preço unitário *</label><input id="pPrecoUnit" type="number" min="0" step="0.01" oninput="calcTotalPedido()"></div>
-      <div><label>Total</label><input id="pTotal" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--sage-dark)"></div>
+      <div id="pPrecoUnitWrap"><label>Preço unitário *</label><input id="pPrecoUnit" type="number" min="0" step="0.01" oninput="calcTotalPedido()"></div>
+      <div id="pTotalWrap"><label>Total</label><input id="pTotal" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--sage-dark)"></div>
     </div>
     <div class="form-row">
       <div><label>Data *</label><input id="pData" type="date"></div>
-      <div><label>Forma de pagamento</label><select id="pFormaPagamento">
+      <div id="pFormaPagamentoWrap"><label>Forma de pagamento</label><select id="pFormaPagamento">
         <option value="Pix">Pix</option><option value="Dinheiro">Dinheiro</option><option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
       </select></div>
     </div>
     <div class="form-row">
-      <div><label>Valor pago (R$)</label><input id="pValorPago" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcTotalPedido()"></div>
-      <div><label>Valor restante</label><input id="pValorRestante" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--rose-dark)"></div>
+      <div id="pValorPagoWrap"><label>Valor pago (R$)</label><input id="pValorPago" type="number" min="0" step="0.01" placeholder="0.00" oninput="calcTotalPedido()"></div>
+      <div id="pValorRestanteWrap"><label>Valor restante</label><input id="pValorRestante" type="text" readonly style="background:#f8f0f3;font-weight:600;color:var(--rose-dark)"></div>
     </div>
     <div class="form-row single">
       <div><label>Observações</label><input id="pObs" type="text" placeholder="Detalhes do pedido... (aparece no recibo)"></div>
     </div>
     <button class="btn btn-primary" onclick="salvarPedido()">💾 Registrar pedido</button>
   </div>
+
   <h2 class="section-title">Histórico de pedidos</h2>
+  <div class="form-row mb-12">
+    <div><label>Filtrar por tipo</label><select id="pedidosFiltroTipoSel" onchange="filtrarPedidosTipo(this.value)">
+      <option value="todos">Todos</option><option value="venda">Venda</option><option value="brinde">Brinde</option><option value="sorteio">Prêmio de sorteio</option>
+    </select></div>
+    <div><label>Filtrar por status</label><select id="pedidosFiltroStatusSel" onchange="filtrarPedidosStatus(this.value)">
+      <option value="todos">Todos</option><option value="pendente">Pendente</option><option value="entregue">Entregue</option>
+    </select></div>
+  </div>
   <div id="pedidosList"></div>
 </div>
 
@@ -329,7 +346,12 @@
       <div><label>Descrição *</label><input id="despDesc" type="text" placeholder="Embalagem, frete..."></div>
       <div><label>Valor (R$) *</label><input id="despValor" type="number" min="0" step="0.01" placeholder="0.00"></div>
     </div>
-    <div class="form-row single"><div><label>Data</label><input id="despData" type="date"></div></div>
+    <div class="form-row">
+      <div><label>Categoria</label><select id="despCateg">
+        <option value="outras">Outras</option><option value="brindes">Brindes</option><option value="sorteios">Sorteios</option>
+      </select></div>
+      <div><label>Data</label><input id="despData" type="date"></div>
+    </div>
     <button class="btn btn-primary" onclick="salvarDespesa()">💾 Salvar despesa</button>
   </div>
 </div>

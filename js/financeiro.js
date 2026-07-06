@@ -11,7 +11,7 @@ function initFinanceiro() {
 
 /** Calcula os números do mês (usado tanto pela tela quanto pelo dashboard) */
 function calcularFinanceiroMes(prefixo) {
-  const pedidos = DB.get('pedidos').filter(p => p.status === 'entregue' && mesAno(p.dataConclusao || p.data) === prefixo);
+  const pedidos = DB.get('pedidos').filter(p => p.status === 'entregue' && (p.tipo || 'venda') === 'venda' && mesAno(p.dataConclusao || p.data) === prefixo);
   const totalReceita = pedidos.reduce((s, p) => s + p.total, 0);
 
   const producoes = DB.get('producoes').filter(pr => mesAno(pr.data) === prefixo);
@@ -20,9 +20,17 @@ function calcularFinanceiroMes(prefixo) {
 
   const despesas = DB.get('despesas').filter(d => mesAno(d.data) === prefixo);
   const totalDesp = despesas.reduce((s, d) => s + d.valor, 0);
+  const totalBrindesDesp = despesas.filter(d => d.categ === 'brindes').reduce((s, d) => s + d.valor, 0);
+  const totalSorteiosDesp = despesas.filter(d => d.categ === 'sorteios').reduce((s, d) => s + d.valor, 0);
+  const totalOutrasDesp = totalDesp - totalBrindesDesp - totalSorteiosDesp;
 
   const lucro = totalReceita - custoMat - custoMO - totalDesp;
-  return { totalReceita, custoMat, custoMO, totalDesp, lucro, pedidos, despesas };
+  return { totalReceita, custoMat, custoMO, totalDesp, totalBrindesDesp, totalSorteiosDesp, totalOutrasDesp, lucro, pedidos, despesas };
+}
+
+/** Rótulo amigável da categoria de despesa */
+function categDespesaLabel(c) {
+  return c === 'brindes' ? 'Brinde' : c === 'sorteios' ? 'Sorteio' : 'Outra';
 }
 
 function gerarFinanceiro() {
@@ -40,8 +48,10 @@ function gerarFinanceiro() {
       <div class="fin-section-title">Saídas</div>
       <div class="fin-row"><span class="fin-label">Materiais consumidos na produção</span><span class="fin-val red">R$ ${fmtN(r.custoMat)}</span></div>
       <div class="fin-row"><span class="fin-label">Mão de obra</span><span class="fin-val red">R$ ${fmtN(r.custoMO)}</span></div>
-      <div class="fin-row"><span class="fin-label">Outras despesas</span><span class="fin-val red">R$ ${fmtN(r.totalDesp)}</span></div>
-      ${r.despesas.map(d => `<div class="fin-row" style="padding-left:20px;background:#fafafa"><span class="fin-label" style="font-size:12px;color:var(--muted)">↳ ${d.desc}</span><span class="fin-val" style="font-size:12px;color:var(--muted)">R$ ${fmtN(d.valor)}</span></div>`).join('')}
+      <div class="fin-row"><span class="fin-label">Brindes</span><span class="fin-val red">R$ ${fmtN(r.totalBrindesDesp)}</span></div>
+      <div class="fin-row"><span class="fin-label">Sorteios</span><span class="fin-val red">R$ ${fmtN(r.totalSorteiosDesp)}</span></div>
+      <div class="fin-row"><span class="fin-label">Outras despesas</span><span class="fin-val red">R$ ${fmtN(r.totalOutrasDesp)}</span></div>
+      ${r.despesas.map(d => `<div class="fin-row" style="padding-left:20px;background:#fafafa"><span class="fin-label" style="font-size:12px;color:var(--muted)">↳ [${categDespesaLabel(d.categ)}] ${d.desc}</span><span class="fin-val" style="font-size:12px;color:var(--muted)">R$ ${fmtN(d.valor)}</span></div>`).join('')}
     </div>
     <div class="fin-total-row">
       <span class="fin-label">Lucro líquido do mês</span>
@@ -88,12 +98,14 @@ function salvarDespesa() {
   const desc = document.getElementById('despDesc').value.trim();
   const valor = parseFloat(document.getElementById('despValor').value) || 0;
   const data = document.getElementById('despData').value || today();
+  const categ = document.getElementById('despCateg').value || 'outras';
   if (!desc || valor <= 0) { toast('Preencha descrição e valor', 'error'); return; }
   const despesas = DB.get('despesas');
-  despesas.push({ id: uid(), desc, valor, data });
+  despesas.push({ id: uid(), desc, valor, data, categ });
   DB.set('despesas', despesas);
   document.getElementById('despDesc').value = '';
   document.getElementById('despValor').value = '';
+  document.getElementById('despCateg').value = 'outras';
   gerarFinanceiro();
   toast('Despesa salva!', 'success');
 }

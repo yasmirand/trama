@@ -34,6 +34,8 @@ function renderPulseiras() {
         <div class="item-detail">📈 Lucro est.: <strong>${fmt(lucro)}</strong></div>
         <div class="item-detail">⏱ Tempo médio: <strong>${p.tempoMedio || 0} min</strong></div>
         <div class="item-detail">🛍 Vendidas: <strong>${p.vendidas || 0}</strong></div>
+        <div class="item-detail">🎁 Brindes: <strong>${p.brindes || 0}</strong></div>
+        <div class="item-detail">🎉 Sorteios: <strong>${p.sorteios || 0}</strong></div>
       </div>
       <div class="item-actions">
         <button class="btn-produce" onclick="abrirProduzir('${p.id}')">🧵 Produzir</button>

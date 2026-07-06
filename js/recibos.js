@@ -9,7 +9,7 @@
 
 /** Nome do ateliê/empresa é salvo em DB.config para lembrar entre sessões */
 function getReciboEmpresa() {
-  return DB.getConfig().reciboEmpresa || 'Ateliê Pulseiras';
+  return DB.getConfig().reciboEmpresa || 'Trama';
 }
 function salvarReciboEmpresa(nome) {
   const cfg = DB.getConfig();
@@ -33,7 +33,7 @@ function previewRecibo() {
   const id = document.getElementById('reciboPedidoId').value;
   const p = DB.get('pedidos').find(x => x.id === id);
   if (!p) return;
-  const empresa = document.getElementById('reciboEmpresaInput').value || 'Ateliê Pulseiras';
+  const empresa = document.getElementById('reciboEmpresaInput').value || 'Trama';
   document.getElementById('reciboPreview').innerHTML = gerarHTMLRecibo(p, empresa);
 }
 

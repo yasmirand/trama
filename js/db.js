@@ -59,7 +59,7 @@ const DB = {
 
     // 3) garante campos novos em registros de pulseiras que vieram de backups antigos
     const pulseirasAtualizadas = this.get('pulseiras').map(p => ({
-      estoque: 0, vendidas: 0, unidadesProduzidas: 0, materiais: [], tempoMedio: 0, custoMedio: 0, precoPadrao: 0,
+      estoque: 0, vendidas: 0, brindes: 0, sorteios: 0, unidadesProduzidas: 0, materiais: [], tempoMedio: 0, custoMedio: 0, precoPadrao: 0,
       ...p
     }));
     this.set('pulseiras', pulseirasAtualizadas);
